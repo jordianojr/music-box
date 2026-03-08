@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Music Box — Playing</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a15 100%);
+    font-family: 'Georgia', serif;
+    color: #d4af37;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    padding: 20px;
+  }
+
+  .back-btn {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    background: none;
+    border: 1px solid rgba(212,175,55,0.3);
+    color: #d4af37;
+    font-family: 'Georgia', serif;
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    z-index: 10;
+    letter-spacing: 1px;
+  }
+
+  .back-btn:hover { border-color: rgba(212,175,55,0.6); }
+
+
+  .music-box {
+    position: relative;
+    width: 280px;
+    height: 200px;
+    perspective: 800px;
+    perspective-origin: center 60%;
+    margin-top: calc(50vh - 150px);
+    margin-bottom: auto;
+  }
+
+  /* 3D scene wrapper */
+  .box-scene {
+    position: absolute;
+    bottom: 0;
+    width: 280px;
+    height: 180px;
+    transform-style: preserve-3d;
+    transform: rotateX(var(--viewX, -35deg)) rotateY(var(--viewY, -20deg));
+    transition: transform 10s ease;
+  }
+
+  /* All 3D faces */
+  .box-front, .box-back, .box-right, .box-left, .box-bottom,
+  .lid-front, .lid-back, .lid-top, .lid-right, .lid-left, .lid-inner {
+    position: absolute;
+    backface-visibility: visible;
+  }
+
+  /* The box body - 3D cube: 280w × 140h × 120d */
+  .box-body {
+    position: absolute;
+    bottom: 0;
+    width: 280px;
+    height: 140px;
+    transform-style: preserve-3d;
+    z-index: 1;
+  }
+
+  /* Front face */
+  .box-front {
+    width: 280px;
+    height: 140px;
+    background: linear-gradient(145deg, #8B4513 0%, #5C2E0A 40%, #3E1A00 100%);
+    border: 2px solid #a0522d;
+    border-radius: 0 0 8px 8px;
+    box-shadow: inset 0 2px 4px rgba(255,200,100,0.1);
+    transform: translateZ(125px);
+  }
+
+  .box-front::before {
+    content: '';
+    position: absolute;
+    top: 8px; left: 8px; right: 8px; bottom: 8px;
+    border: 1px solid rgba(210,160,80,0.2);
+    border-radius: 4px;
+  }
+
+  /* Back face */
+  .box-back {
+    width: 280px;
+    height: 140px;
+    background: linear-gradient(145deg, #6B3410 0%, #4C1E08 40%, #2E1200 100%);
+    border: 2px solid #8a4420;
+    border-radius: 0 0 8px 8px;
+    transform: rotateY(180deg) translateZ(125px);
+  }
+
+  /* Right face — centered: left:(280-120)/2=80 */
+  .box-right {
+    width: 250px;
+    height: 140px;
+    left: 15px;
+    background: linear-gradient(145deg, #7A3B10 0%, #52280A 40%, #361800 100%);
+    border: 2px solid #955228;
+    transform: rotateY(90deg) translateZ(140px);
+  }
+
+  .box-right::before {
+    content: '';
+    position: absolute;
+    top: 8px; left: 8px; right: 8px; bottom: 8px;
+    border: 1px solid rgba(210,160,80,0.15);
+    border-radius: 4px;
+  }
+
+  /* Left face — centered: left:80 */
+  .box-left {
+    width: 250px;
+    height: 140px;
+    left: 15px;
+    background: linear-gradient(145deg, #9B5020 0%, #6C3510 40%, #4E2508 100%);
+    border: 2px solid #a0522d;
+    transform: rotateY(-90deg) translateZ(140px);
+  }
+
+  .box-left::before {
+    content: '';
+    position: absolute;
+    top: 8px; left: 8px; right: 8px; bottom: 8px;
+    border: 1px solid rgba(210,160,80,0.15);
+    border-radius: 4px;
+  }
+
+  /* Bottom face — centered: top:(140-160)/2=-10 */
+  .box-bottom {
+    width: 280px;
+    height: 250px;
+    top: -55px;
+    background: linear-gradient(145deg, #3E1A00 0%, #2E1200 100%);
+    border: 2px solid #6B3410;
+    transform: rotateX(90deg) translateZ(-70px);
+  }
+
+  .box-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: rgba(212, 175, 55, 0.5);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  }
+
+  /* The lid - 3D: 280w × 20h × 120d */
+  .box-lid {
+    position: absolute;
+    bottom: 138px;
+    width: 280px;
+    height: 20px;
+    transform-style: preserve-3d;
+    transform-origin: center top -125px;
+    transform: rotateX(0deg);
+    z-index: 2;
+  }
+
+  /* Lid front face */
+  .lid-front {
+    width: 280px;
+    height: 20px;
+    background: linear-gradient(145deg, #9B5523 0%, #6C3E1A 40%, #4E2A10 100%);
+    border: 2px solid #a0522d;
+    border-radius: 4px 4px 0 0;
+    transform: translateZ(125px);
+  }
+
+  /* Lid back face */
+  .lid-back {
+    width: 280px;
+    height: 20px;
+    background: linear-gradient(145deg, #7B4018 0%, #4C2E10 40%, #3E2008 100%);
+    border: 2px solid #8a4420;
+    border-radius: 4px 4px 0 0;
+    transform: rotateY(180deg) translateZ(125px);
+  }
+
+  /* Lid top face — flush with top edge of side panels (y=0) */
+  .lid-top {
+    width: 280px;
+    height: 250px;
+    top: -115px;
+    background: linear-gradient(145deg, #A05828 0%, #7C4218 40%, #5E3010 100%);
+    border: 2px solid #a0522d;
+    border-radius: 8px;
+    transform: rotateX(-90deg) translateZ(-10px);
+    transform-style: preserve-3d;
+  }
+
+  .lid-top::before {
+    content: '';
+    position: absolute;
+    top: 8px; left: 8px; right: 8px; bottom: 8px;
+    border: 1px solid rgba(210,160,80,0.2);
+    border-radius: 4px;
+  }
+
+  /* Lid photo circle */
+  .lid-photo-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) translateZ(1px);
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(212,175,55,0.4);
+    box-shadow: 0 0 12px rgba(0,0,0,0.4), inset 0 0 6px rgba(0,0,0,0.3);
+  }
+
+  .lid-photo-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+  }
+
+  .lid-photo-container img.active {
+    opacity: 1;
+  }
+
+  /* Lid right face — centered: left:80 */
+  .lid-right {
+    width: 250px;
+    height: 20px;
+    left: 15px;
+    background: linear-gradient(145deg, #8A4818 0%, #5C3010 100%);
+    border: 2px solid #955228;
+    backface-visibility: visible;
+    transform: rotateY(90deg) translateZ(140px);
+  }
+
+  /* Lid left face — centered: left:80 */
+  .lid-left {
+    width: 250px;
+    height: 20px;
+    left: 15px;
+    background: linear-gradient(145deg, #A86030 0%, #7C4520 100%);
+    border: 2px solid #a0522d;
+    backface-visibility: visible;
+    transform: rotateY(-90deg) translateZ(140px);
+  }
+
+  /* Lid inner face (bottom of lid) — flush with bottom edge (y=20) */
+  .lid-inner {
+    width: 280px;
+    height: 250px;
+    top: -115px;
+    background: linear-gradient(to bottom, #2a0a00, #4E2A10);
+    transform: rotateX(90deg) translateZ(10px);
+  }
+
+  /* Hinge detail */
+  .box-hinge {
+    position: absolute;
+    width: 20px;
+    height: 8px;
+    background: linear-gradient(to bottom, #d4af37, #8B6914);
+    border-radius: 3px;
+    top: -4px;
+    z-index: 5;
+  }
+
+  /* Metal latch on front */
+  .box-latch {
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 12px;
+    background: linear-gradient(to bottom, #d4af37, #b8960c);
+    border-radius: 0 0 4px 4px;
+    border: 1px solid #8B6914;
+    z-index: 3;
+  }
+
+  /* Music box interior — 3D slab at top of box body */
+  .box-interior {
+    position: absolute;
+    left: 2px;
+    width: 276px;
+    height: 20px;
+    opacity: 0;
+    overflow: visible;
+    transform-style: preserve-3d;
+    top: -20px;
+  }
+
+  .box-interior > div {
+    position: absolute;
+  }
+
+  /* Top face of interior slab — holds the vinyl */
+  .interior-top {
+    width: 276px;
+    height: 246px;
+    top: -113px;
+    background: linear-gradient(145deg, #C8956A, #A07050);
+    transform: rotateX(-90deg) translateZ(-10px);
+    overflow: visible;
+    transform-style: preserve-3d;
+  }
+
+  /* Bottom face of interior slab */
+  .interior-bottom {
+    width: 276px;
+    height: 246px;
+    top: -113px;
+    background: linear-gradient(145deg, #A07050, #887060);
+    transform: rotateX(90deg) translateZ(10px);
+  }
+
+  /* Front face of interior slab */
+  .interior-front {
+    width: 276px;
+    height: 20px;
+    background: linear-gradient(145deg, #B8855A, #9A6842);
+    border: 1px solid #C09060;
+    transform: translateZ(123px);
+  }
+
+  /* Back face of interior slab */
+  .interior-back {
+    width: 276px;
+    height: 20px;
+    background: linear-gradient(145deg, #A07850, #8A6238);
+    transform: rotateY(180deg) translateZ(123px);
+  }
+
+  /* Right face of interior slab */
+  .interior-right {
+    width: 246px;
+    height: 20px;
+    left: 15px;
+    background: linear-gradient(145deg, #B08050, #9A6842);
+    transform: rotateY(90deg) translateZ(138px);
+  }
+
+  /* Left face of interior slab */
+  .interior-left {
+    width: 246px;
+    height: 20px;
+    left: 15px;
+    background: linear-gradient(145deg, #BA8A5A, #A07248);
+    transform: rotateY(-90deg) translateZ(138px);
+  }
+
+  /* Vinyl record — 5px thick 3D disc sitting on interior-top */
+  .record {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    left: 38px;
+    top: -90px;
+    transform-style: preserve-3d;
+    transform: rotateX(-90deg) translateY(5px) translateZ(-10px);
+  }
+
+  .record-face {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+  }
+
+  /* Top face of vinyl — visible grooves */
+  .record-face-top {
+    background:
+      radial-gradient(circle, #d4af37 8px, #b8860b 11px, #8B6914 22px, #1a1a1a 25px, #222 27px, #111 35px, #1a1a1a 35.5px, #222 36px, #111 44px, #1a1a1a 44.5px, #222 45px, #111 53px, #1a1a1a 53.5px, #222 54px, #111 62px, #1a1a1a 62.5px, #222 63px, #111 71px, #1a1a1a 71.5px, #222 72px, #111 80px, #1a1a1a 80.5px, #222 81px, #111 88px, #1a1a1a 88.5px, #181818 89px, #111 100px);
+    box-shadow: 0 10px 0 #0a0a0a, 0 0 10px rgba(0,0,0,0.6), inset 0 0 3px rgba(255,255,255,0.05);
+    transform: translateZ(10px);
+  }
+
+  /* Bottom face of vinyl — sits on the tan panel */
+  .record-face-bottom {
+    background: #0a0a0a;
+    transform: translateZ(0px);
+  }
+
+  .record.spinning {
+    animation: spin-record 15s linear infinite;
+  }
+
+  @keyframes spin-record {
+    from { transform: rotateX(-90deg) translateY(5px) translateZ(-10px) rotate(360deg); }
+    to { transform: rotateX(-90deg) translateY(5px) translateZ(-10px) rotate(0deg); }
+  }
+
+  .record-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) translateZ(10.1px);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #d4af37 5px, #b8860b 10px, #8B6914 22px, #6B4F12 25px);
+    box-shadow: inset 0 0 2px rgba(0,0,0,0.3);
+  }
+
+  .record-text-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200px;
+    height: 200px;
+    pointer-events: none;
+    transform: scaleX(-1);
+  }
+
+  .record-text {
+    font-family: 'Georgia', serif;
+    font-size: 18px;
+    fill: #c0a060;
+    letter-spacing: 0.5px;
+    font-weight: bold;
+  }
+
+  /* Shadow on the ground */
+  .box-shadow {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    height: 40px;
+    background: radial-gradient(ellipse, rgba(0,0,0,0.5) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* Gentle idle sway */
+  .box-scene {
+    animation: idle-sway 6s ease-in-out infinite;
+  }
+
+  @keyframes idle-sway {
+    0%, 100% { transform: rotateX(var(--viewX, -35deg)) rotateY(var(--viewY, -20deg)); }
+    50% { transform: rotateX(calc(var(--viewX, -35deg) + 2deg)) rotateY(calc(var(--viewY, -20deg) + 2deg)); }
+  }
+
+  /* View controls */
+  .view-controls {
+    display: flex;
+    gap: 20px;
+    margin-top: 15px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .view-controls label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(212,175,55,0.7);
+    font-size: 12px;
+    font-family: 'Georgia', serif;
+  }
+
+  .view-controls input[type="range"] {
+    width: 120px;
+    accent-color: #d4af37;
+  }
+
+  .view-controls span {
+    min-width: 35px;
+    font-size: 11px;
+    color: rgba(212,175,55,0.5);
+  }
+
+  /* Wind-up key — BELOW the box for mobile */
+  .winding-section {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .winding-area {
+    width: 100px;
+    height: 100px;
+    cursor: grab;
+    position: relative;
+    touch-action: none;
+  }
+
+  .winding-area:active { cursor: grabbing; }
+
+  .key-base {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 12px;
+    height: 20px;
+    background: linear-gradient(to right, #d4af37, #b8960c);
+    border-radius: 2px;
+  }
+
+  .key-handle {
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70px;
+    height: 70px;
+    border: 8px solid #d4af37;
+    border-radius: 50%;
+    background: transparent;
+    transition: border-color 0.2s;
+  }
+
+  .key-handle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    background: #d4af37;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .winding-area:hover .key-handle {
+    border-color: #f0d060;
+  }
+
+  .wind-label {
+    font-size: 12px;
+    opacity: 0.4;
+    margin-top: 8px;
+    letter-spacing: 1px;
+  }
+
+  /* Status */
+  .status {
+    margin-top: 24px;
+    text-align: center;
+    font-size: 14px;
+    min-height: 50px;
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .status-line {
+    margin: 4px 0;
+    opacity: 0.8;
+  }
+
+  .energy-bar-container {
+    width: 100%;
+    max-width: 260px;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    margin: 10px auto;
+    overflow: hidden;
+  }
+
+  .energy-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #d4af37, #f0d060);
+    border-radius: 3px;
+    transition: width 0.1s linear;
+    width: 0%;
+  }
+
+  /* Floating notes */
+  .note {
+    position: absolute;
+    font-size: 18px;
+    pointer-events: none;
+    opacity: 0;
+    animation: float-note 2s ease-out forwards;
+    z-index: 10;
+  }
+
+  @keyframes float-note {
+    0% { opacity: 0.8; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-60px) scale(0.5) rotate(20deg); }
+  }
+</style>
+</head>
+<body>
+
+<button class="back-btn" onclick="window.location.href='index.html'">&larr; back</button>
+
+<div class="music-box" id="musicBox">
+  <div class="box-scene" id="boxScene">
+    <div class="box-lid" id="lid">
+      <div class="lid-front">
+        <div class="box-latch"></div>
+      </div>
+      <div class="lid-back"></div>
+      <div class="lid-top">
+        <div class="lid-photo-container" id="lidPhotos"></div>
+      </div>
+      <div class="lid-right"></div>
+      <div class="lid-left"></div>
+      <div class="lid-inner"></div>
+    </div>
+    <div class="box-body">
+      <div class="box-front">
+        <div class="box-label">Music Box</div>
+      </div>
+      <div class="box-back"></div>
+      <div class="box-right"></div>
+      <div class="box-left"></div>
+      <div class="box-bottom"></div>
+      <div class="box-interior">
+        <div class="interior-top"></div>
+        <div class="interior-bottom"></div>
+        <div class="interior-front"></div>
+        <div class="interior-back"></div>
+        <div class="interior-right"></div>
+        <div class="interior-left"></div>
+        <div class="record" id="record">
+          <div class="record-face record-face-top">
+            <div class="record-label"></div>
+          </div>
+          <div class="record-face record-face-bottom"></div>
+          <svg class="record-text-svg" viewBox="0 0 200 200">
+            <defs>
+              <path id="textCircle" d="M 100,100 m -65,0 a 65,65 0 1,1 130,0 a 65,65 0 1,1 -130,0" />
+            </defs>
+            <text class="record-text">
+              <textPath href="#textCircle" startOffset="0%" id="recordTextPath">Music Box</textPath>
+            </text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="box-shadow"></div>
+</div>
+
+<div class="winding-section">
+  <div class="winding-area" id="windArea">
+    <div class="key-base"></div>
+    <div class="key-handle" id="keyHandle"></div>
+  </div>
+  <div class="wind-label">drag to wind</div>
+</div>
+
+<div class="status">
+  <div class="status-line" id="statusText">Wind the key to play</div>
+  <div class="energy-bar-container">
+    <div class="energy-bar" id="energyBar"></div>
+  </div>
+  <div class="status-line" id="timeInfo"></div>
+</div>
+
+<div class="view-controls">
+  <label>Tilt <input type="range" id="viewX" min="-90" max="0" value="-35" step="1"><span id="viewXVal">-35°</span></label>
+</div>
+
+<script>
+// ── View controls ──
+(() => {
+  const scene = document.querySelector('.box-scene');
+  const viewX = document.getElementById('viewX');
+  const viewXVal = document.getElementById('viewXVal');
+
+  function updateView() {
+    scene.style.setProperty('--viewX', viewX.value + 'deg');
+    viewXVal.textContent = viewX.value + '°';
+  }
+
+  viewX.addEventListener('input', updateView);
+  updateView();
+})();
+
+(() => {
+  // ── Determine mode: uploaded song or default melody ──
+  const params = new URLSearchParams(window.location.search);
+  const songId = params.get('song') ? parseInt(params.get('song')) : null;
+  const boxColor = params.get('color') || 'classic';
+  const boxParticles = params.get('particles') || 'notes';
+
+  // ── Apply box colour theme ──
+  const colorThemes = {
+    classic: { front: '#8B4513', mid: '#5C2E0A', dark: '#3E1A00', side: '#7A3B10', sideMid: '#52280A', sideDark: '#361800', left: '#9B5020', leftMid: '#6C3510', leftDark: '#4E2508', lid: '#9B5523', lidMid: '#6C3E1A', lidDark: '#4E2A10', top: '#A05828', topMid: '#7C4218', topDark: '#5E3010' },
+    mahogany: { front: '#6B1010', mid: '#4A0808', dark: '#2E0000', side: '#5A0A0A', sideMid: '#3E0505', sideDark: '#2A0000', left: '#7A1515', leftMid: '#550A0A', leftDark: '#3A0505', lid: '#7A1818', lidMid: '#551010', lidDark: '#3A0808', top: '#8A2020', topMid: '#651515', topDark: '#4A0A0A' },
+    ebony: { front: '#2a2a2a', mid: '#1a1a1a', dark: '#0e0e0e', side: '#222', sideMid: '#151515', sideDark: '#0a0a0a', left: '#303030', leftMid: '#1e1e1e', leftDark: '#121212', lid: '#2e2e2e', lidMid: '#1c1c1c', lidDark: '#101010', top: '#353535', topMid: '#252525', topDark: '#181818' },
+    ivory: { front: '#D2C6A0', mid: '#B8A880', dark: '#9A8A60', side: '#C8BC98', sideMid: '#A89878', sideDark: '#8A7A58', left: '#D8CCA8', leftMid: '#BCA888', leftDark: '#9E8A68', lid: '#D5C8A0', lidMid: '#BAA880', lidDark: '#9E8A60', top: '#DED2AA', topMid: '#C4B290', topDark: '#AA9A70' },
+    navy: { front: '#1a3050', mid: '#0e1e35', dark: '#06101e', side: '#152840', sideMid: '#0c1828', sideDark: '#060e18', left: '#1e3858', leftMid: '#122240', leftDark: '#0a1628', lid: '#1c3450', lidMid: '#102035', lidDark: '#081420', top: '#203c5c', topMid: '#152840', topDark: '#0c1828' },
+    rosewood: { front: '#6B1530', mid: '#4A0A1E', dark: '#2E0512', side: '#5A1028', sideMid: '#3E0818', sideDark: '#2A0410', left: '#7A1A38', leftMid: '#551025', leftDark: '#3A0815', lid: '#721835', lidMid: '#501020', lidDark: '#380810', top: '#822040', topMid: '#601530', topDark: '#450A1E' },
+  };
+
+  const theme = colorThemes[boxColor] || colorThemes.classic;
+  const root = document.documentElement;
+
+  // Apply to CSS custom properties
+  document.querySelectorAll('.box-front').forEach(el => el.style.background = `linear-gradient(145deg, ${theme.front} 0%, ${theme.mid} 40%, ${theme.dark} 100%)`);
+  document.querySelectorAll('.box-back').forEach(el => el.style.background = `linear-gradient(145deg, ${theme.dark} 0%, ${theme.mid} 40%, ${theme.dark} 100%)`);
+  document.querySelectorAll('.box-right').forEach(el => el.style.background = `linear-gradient(145deg, ${theme.side} 0%, ${theme.sideMid} 40%, ${theme.sideDark} 100%)`);
+  document.querySelectorAll('.box-left').forEach(el => el.style.background = `linear-gradient(145deg, ${theme.left} 0%, ${theme.leftMid} 40%, ${theme.leftDark} 100%)`);
+  document.querySelectorAll('.lid-front').forEach(el => el.style.background = `linear-gradient(145deg, ${theme.lid} 0%, ${theme.lidMid} 40%, ${theme.lidDark} 100%)`);
+  document.querySelectorAll('.lid-back').forEach(el => el.style.background = `linear-gradient(145deg, ${theme.lidDark} 0%, ${theme.lidMid} 40%, ${theme.lidDark} 100%)`);
+  document.querySelectorAll('.lid-top').forEach(el => el.style.background = `linear-gradient(145deg, ${theme.top} 0%, ${theme.topMid} 40%, ${theme.topDark} 100%)`);
+  document.querySelectorAll('.lid-right').forEach(el => el.style.background = `linear-gradient(145deg, ${theme.side} 0%, ${theme.sideMid} 100%)`);
+  document.querySelectorAll('.lid-left').forEach(el => el.style.background = `linear-gradient(145deg, ${theme.left} 0%, ${theme.leftMid} 100%)`);
+  document.querySelectorAll('.lid-inner').forEach(el => el.style.background = `linear-gradient(to bottom, ${theme.dark}, ${theme.lidDark})`);
+  document.querySelectorAll('.box-bottom').forEach(el => el.style.background = `linear-gradient(145deg, ${theme.dark} 0%, ${theme.dark} 100%)`);
+
+  let useUploadedAudio = !!songId;
+  let audioBuffer = null;     // decoded AudioBuffer for uploaded file
+  let audioSource = null;     // currently playing BufferSource
+  let playbackPosition = 0;   // seconds into the audio we've played so far
+
+  const STATE_KEY = songId ? `musicbox_state_${songId}` : 'musicbox_state_default';
+
+  let savedState = loadState();
+  if (savedState) {
+    playbackPosition = savedState.playbackPosition || 0;
+  }
+
+  let isWinding = false;
+  let windStartTime = 0;
+  let windAccumulated = 0;
+  let lastAngle = null;
+  let totalRotation = 0;
+
+  let isPlaying = false;
+  let playStartTime = 0;
+  let playDuration = 0;
+  let playTimer = null;
+  let audioCtx = null;
+
+  // For default melody mode
+  let noteIndex = savedState ? (savedState.noteIndex || 0) : 0;
+  let scheduledNotes = [];
+
+  // For image slideshow
+  let currentImgIndex = savedState ? (savedState.currentImgIndex || 0) : 0;
+
+  // ── Elements ──
+  const windArea = document.getElementById('windArea');
+  const keyHandle = document.getElementById('keyHandle');
+  const lid = document.getElementById('lid');
+  const record = document.getElementById('record');
+  const energyBar = document.getElementById('energyBar');
+  const statusText = document.getElementById('statusText');
+  const timeInfo = document.getElementById('timeInfo');
+
+  const musicBox = document.getElementById('musicBox');
+
+  // ── Default Melody ──
+  const melody = [
+    { freq: 1047, dur: 200 }, { freq: 1319, dur: 200 }, { freq: 1568, dur: 300 },
+    { freq: 1319, dur: 200 }, { freq: 1047, dur: 200 }, { freq: 1175, dur: 300 },
+    { freq: 1047, dur: 200 }, { freq: 880, dur: 200 },  { freq: 784, dur: 400 },
+    { freq: 0, dur: 200 },
+    { freq: 784, dur: 200 },  { freq: 880, dur: 200 },  { freq: 1047, dur: 300 },
+    { freq: 1175, dur: 200 }, { freq: 1319, dur: 200 }, { freq: 1568, dur: 300 },
+    { freq: 1319, dur: 200 }, { freq: 1175, dur: 200 }, { freq: 1047, dur: 400 },
+    { freq: 0, dur: 200 },
+    { freq: 1568, dur: 200 }, { freq: 1397, dur: 200 }, { freq: 1319, dur: 300 },
+    { freq: 1175, dur: 200 }, { freq: 1047, dur: 200 }, { freq: 880, dur: 300 },
+    { freq: 784, dur: 200 },  { freq: 880, dur: 200 },  { freq: 1047, dur: 400 },
+    { freq: 0, dur: 300 },
+    { freq: 1319, dur: 200 }, { freq: 1175, dur: 200 }, { freq: 1047, dur: 200 },
+    { freq: 880, dur: 200 },  { freq: 784, dur: 300 },  { freq: 880, dur: 200 },
+    { freq: 1047, dur: 300 }, { freq: 1319, dur: 200 }, { freq: 1568, dur: 400 },
+    { freq: 0, dur: 400 },
+  ];
+
+  // ── Load uploaded song from IndexedDB ──
+  function loadSongFromDB(id) {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open('musicbox_db', 1);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains('songs')) {
+          db.createObjectStore('songs', { keyPath: 'id', autoIncrement: true });
+        }
+      };
+      req.onsuccess = (e) => {
+        const db = e.target.result;
+        const tx = db.transaction('songs', 'readonly');
+        const store = tx.objectStore('songs');
+        const getReq = store.get(id);
+        getReq.onsuccess = () => resolve(getReq.result);
+        getReq.onerror = () => reject(getReq.error);
+      };
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  // ── Audio ──
+  function ensureAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  }
+
+  function playMelodyNote(freq, duration, time) {
+    if (!audioCtx || freq === 0) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(freq, time);
+
+    filter.type = 'highpass';
+    filter.frequency.setValueAtTime(400, time);
+    filter.Q.setValueAtTime(1, time);
+
+    const attackTime = 0.005;
+    const decayTime = Math.min(duration / 1000 * 2, 1.5);
+    gain.gain.setValueAtTime(0, time);
+    gain.gain.linearRampToValueAtTime(0.3, time + attackTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + attackTime + decayTime);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(time);
+    osc.stop(time + attackTime + decayTime + 0.05);
+
+    const osc2 = audioCtx.createOscillator();
+    const gain2 = audioCtx.createGain();
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(freq * 2, time);
+    gain2.gain.setValueAtTime(0, time);
+    gain2.gain.linearRampToValueAtTime(0.08, time + attackTime);
+    gain2.gain.exponentialRampToValueAtTime(0.001, time + attackTime + decayTime * 0.6);
+    osc2.connect(gain2);
+    gain2.connect(audioCtx.destination);
+    osc2.start(time);
+    osc2.stop(time + attackTime + decayTime + 0.05);
+  }
+
+  function playClickSound() {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(2000, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.04);
+  }
+
+  // ── Winding ──
+  function getAngle(e) {
+    const rect = windArea.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return Math.atan2(clientY - cy, clientX - cx) * (180 / Math.PI);
+  }
+
+  function onWindStart(e) {
+    e.preventDefault();
+    if (isPlaying) return;
+
+    ensureAudio();
+    isWinding = true;
+    windStartTime = Date.now();
+    lastAngle = getAngle(e);
+    totalRotation = 0;
+    statusText.textContent = 'Winding...';
+  }
+
+  function onWindMove(e) {
+    if (!isWinding) return;
+    e.preventDefault();
+
+    const angle = getAngle(e);
+    if (lastAngle !== null) {
+      let delta = angle - lastAngle;
+      if (delta > 180) delta -= 360;
+      if (delta < -180) delta += 360;
+
+      totalRotation += delta;
+
+      const currentRot = parseFloat(keyHandle.dataset.rot || 0);
+      const newRot = currentRot + delta;
+      keyHandle.dataset.rot = newRot;
+      keyHandle.style.transform = `translateX(-50%) rotate(${newRot}deg)`;
+
+      if (Math.abs(totalRotation) % 30 < Math.abs(delta)) {
+        playClickSound();
+      }
+    }
+    lastAngle = angle;
+  }
+
+  function onWindEnd() {
+    if (!isWinding) return;
+    isWinding = false;
+    lastAngle = null;
+
+    const windDuration = (Date.now() - windStartTime) / 1000;
+    windAccumulated = Math.max(windDuration, 0.5);
+
+    startPlaying();
+  }
+
+  windArea.addEventListener('mousedown', onWindStart);
+  window.addEventListener('mousemove', onWindMove);
+  window.addEventListener('mouseup', onWindEnd);
+  windArea.addEventListener('touchstart', onWindStart, { passive: false });
+  window.addEventListener('touchmove', onWindMove, { passive: false });
+  window.addEventListener('touchend', onWindEnd);
+
+  // ── Playback ──
+  function startPlaying() {
+    ensureAudio();
+
+    playDuration = windAccumulated * 5 * 1000;
+    isPlaying = true;
+    playStartTime = Date.now();
+
+    record.classList.add('spinning');
+    statusText.textContent = 'Playing...';
+
+    if (useUploadedAudio && audioBuffer) {
+      startAudioPlayback();
+    } else {
+      scheduleMelodyNotes();
+    }
+
+    updatePlayback();
+  }
+
+  // ── Uploaded audio playback ──
+  function startAudioPlayback() {
+    if (audioSource) {
+      try { audioSource.stop(); } catch(e) {}
+    }
+
+    audioSource = audioCtx.createBufferSource();
+    audioSource.buffer = audioBuffer;
+    audioSource.connect(audioCtx.destination);
+
+    // Start from saved position, looping
+    const startOffset = playbackPosition % audioBuffer.duration;
+    audioSource.loop = true;
+    audioSource.loopStart = 0;
+    audioSource.loopEnd = audioBuffer.duration;
+    audioSource.start(0, startOffset);
+
+    // Schedule stop at playDuration
+    audioSource.stopTime = audioCtx.currentTime + playDuration / 1000;
+  }
+
+  // ── Default melody scheduling ──
+  function scheduleMelodyNotes() {
+    const now = audioCtx.currentTime;
+    let timeOffset = 0;
+    let idx = noteIndex;
+    scheduledNotes = [];
+
+    while (timeOffset < playDuration) {
+      const note = melody[idx % melody.length];
+      const noteTime = now + timeOffset / 1000;
+      playMelodyNote(note.freq, note.dur, noteTime);
+
+      scheduledNotes.push({ time: timeOffset, idx });
+      timeOffset += note.dur;
+      idx++;
+    }
+    scheduledNotes._finalIdx = idx;
+  }
+
+  function updatePlayback() {
+    if (!isPlaying) return;
+
+    const elapsed = Date.now() - playStartTime;
+    const remaining = playDuration - elapsed;
+    const progress = Math.max(0, 1 - elapsed / playDuration);
+
+    energyBar.style.width = (progress * 100) + '%';
+
+    // Animate lid: open over first 2s, close over last 2s
+    const openMs = 2000;
+    const closeMs = 2000;
+    const maxAngle = 75;
+    let lidAngle;
+    if (elapsed < openMs) {
+      // Ease out during opening
+      const t = elapsed / openMs;
+      lidAngle = maxAngle * (1 - Math.pow(1 - t, 3));
+    } else if (remaining < closeMs) {
+      // Ease in during closing
+      const t = Math.max(0, remaining) / closeMs;
+      lidAngle = maxAngle * (1 - Math.pow(1 - t, 3));
+    } else {
+      lidAngle = maxAngle;
+    }
+    lid.style.transform = `rotateX(${lidAngle}deg)`;
+    // Show interior proportionally
+    const interiorEl = document.querySelector('.box-interior');
+    interiorEl.style.opacity = Math.min(1, lidAngle / 30);
+
+    const remSec = Math.max(0, remaining / 1000).toFixed(1);
+    timeInfo.textContent = `${remSec}s remaining`;
+
+    // Animate teeth at intervals
+    // Spawn floating notes periodically
+    if (useUploadedAudio) {
+      const interval = 300;
+      const cur = Math.floor(elapsed / interval);
+      const prev = Math.floor((elapsed - 16) / interval);
+      if (cur !== prev) spawnNote();
+    } else {
+      for (const sn of scheduledNotes) {
+        if (!sn.triggered && elapsed >= sn.time) {
+          sn.triggered = true;
+          spawnNote();
+        }
+      }
+    }
+
+    if (elapsed >= playDuration) {
+      stopPlaying();
+      return;
+    }
+
+    playTimer = requestAnimationFrame(updatePlayback);
+  }
+
+  function stopPlaying() {
+    isPlaying = false;
+    cancelAnimationFrame(playTimer);
+    record.classList.remove('spinning');
+
+    // Stop uploaded audio
+    if (audioSource) {
+      try { audioSource.stop(); } catch(e) {}
+      audioSource = null;
+    }
+
+    const elapsed = Date.now() - playStartTime;
+
+    if (useUploadedAudio && audioBuffer) {
+      // Save how far into the audio file we got
+      playbackPosition += (elapsed / 1000);
+      // Wrap around if past the end
+      playbackPosition = playbackPosition % audioBuffer.duration;
+
+      saveState({ playbackPosition, currentImgIndex });
+
+      statusText.textContent = 'Spring unwound — wind again to continue';
+      timeInfo.textContent = '';
+    } else {
+      // Default melody — save note index
+      let timeAcc = 0;
+      let idx = noteIndex;
+      while (timeAcc < elapsed && timeAcc < playDuration) {
+        timeAcc += melody[idx % melody.length].dur;
+        idx++;
+      }
+      noteIndex = idx;
+      saveState({ noteIndex, currentImgIndex });
+
+      statusText.textContent = 'Spring unwound — wind again to continue';
+      timeInfo.textContent = '';
+    }
+
+    lid.style.transform = 'rotateX(0deg)';
+    document.querySelector('.box-interior').style.opacity = '0';
+    energyBar.style.width = '0%';
+    savedState = loadState();
+  }
+
+  const particleSets = {
+    notes: ['\u266B', '\u266A', '\u266C', '\u2669'],
+    hearts: ['\u2764', '\u2765', '\u2661', '\u2763'],
+    flowers: ['\u2740', '\u2741', '\u273F', '\u2743'],
+  };
+
+  function spawnNote() {
+    const symbols = particleSets[boxParticles] || particleSets.notes;
+    const el = document.createElement('div');
+    el.className = 'note';
+    el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+    el.style.left = (80 + Math.random() * 120) + 'px';
+    el.style.top = (60 + Math.random() * 40) + 'px';
+    el.style.color = `hsl(${40 + Math.random() * 20}, 80%, ${60 + Math.random() * 20}%)`;
+    musicBox.appendChild(el);
+    setTimeout(() => el.remove(), 2000);
+  }
+
+  // ── Persistence ──
+  function saveState(state) {
+    try { localStorage.setItem(STATE_KEY, JSON.stringify(state)); } catch(e) {}
+  }
+
+  function loadState() {
+    try {
+      const s = localStorage.getItem(STATE_KEY);
+      return s ? JSON.parse(s) : null;
+    } catch(e) { return null; }
+  }
+
+  // ── Init ──
+  async function init() {
+    if (songId) {
+      try {
+        const song = await loadSongFromDB(songId);
+        if (song) {
+
+          ensureAudio();
+          audioBuffer = await audioCtx.decodeAudioData(song.data.slice(0));
+
+          // Set song name on vinyl
+          const textPath = document.getElementById('recordTextPath');
+          if (textPath && song.name) {
+            const label = song.name.toUpperCase();
+            textPath.textContent = label;
+          }
+
+          // Load images onto lid-top
+          if (song.images && song.images.length > 0) {
+            const container = document.getElementById('lidPhotos');
+            // Clamp restored index to valid range
+            currentImgIndex = currentImgIndex % song.images.length;
+            song.images.forEach((dataUrl, i) => {
+              const img = document.createElement('img');
+              img.src = dataUrl;
+              if (i === currentImgIndex) img.classList.add('active');
+              container.appendChild(img);
+            });
+
+            if (song.images.length > 1) {
+              setInterval(() => {
+                const imgs = container.querySelectorAll('img');
+                imgs[currentImgIndex].classList.remove('active');
+                currentImgIndex = (currentImgIndex + 1) % imgs.length;
+                imgs[currentImgIndex].classList.add('active');
+              }, 3000);
+            }
+          } else {
+            document.getElementById('lidPhotos').style.display = 'none';
+          }
+
+          if (savedState && savedState.playbackPosition != null) {
+            statusText.textContent = 'Wind the key to resume';
+          }
+        } else {
+          // Song not found
+          useUploadedAudio = false;
+        }
+      } catch(e) {
+        console.error('Failed to load song:', e);
+        // Error loading song
+        useUploadedAudio = false;
+      }
+    } else {
+      // Default melody
+      useUploadedAudio = false;
+    }
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

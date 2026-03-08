@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title></title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a15 100%);
+    font-family: 'Georgia', serif;
+    color: #d4af37;
+    overflow-x: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    padding: 40px 20px 30px;
+  }
+
+  h1 {
+    font-size: 22px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    text-shadow: 0 2px 8px rgba(212,175,55,0.3);
+  }
+
+  .subtitle {
+    font-size: 13px;
+    opacity: 0.5;
+    margin-bottom: 36px;
+    letter-spacing: 2px;
+  }
+
+  /* Upload area */
+  .upload-area {
+    width: 100%;
+    max-width: 340px;
+    border: 2px dashed rgba(212,175,55,0.3);
+    border-radius: 16px;
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: rgba(255,255,255,0.02);
+    margin-bottom: 30px;
+  }
+
+  .upload-area:hover, .upload-area.dragover {
+    border-color: rgba(212,175,55,0.7);
+    background: rgba(212,175,55,0.05);
+  }
+
+  .upload-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+    opacity: 0.6;
+  }
+
+  .upload-text {
+    font-size: 14px;
+    opacity: 0.7;
+    line-height: 1.6;
+  }
+
+  .upload-text small {
+    display: block;
+    margin-top: 6px;
+    font-size: 11px;
+    opacity: 0.5;
+  }
+
+  input[type="file"] { display: none; }
+
+  /* Song list */
+  .song-list {
+    width: 100%;
+    max-width: 340px;
+    list-style: none;
+    margin-bottom: 20px;
+  }
+
+  .song-list:empty::before {
+    content: 'no boxes yet — create one above!';
+    display: block;
+    text-align: center;
+    font-size: 13px;
+    opacity: 0.3;
+    padding: 20px;
+  }
+
+  .song-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(212,175,55,0.15);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+
+  .song-item:hover {
+    background: rgba(212,175,55,0.08);
+    border-color: rgba(212,175,55,0.4);
+  }
+
+  .song-item:active {
+    transform: scale(0.98);
+  }
+
+  .song-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #d4af37, #8B4513);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .song-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .song-name {
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .song-meta {
+    font-size: 11px;
+    opacity: 0.4;
+    margin-top: 2px;
+  }
+
+  .song-delete {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: rgba(255,80,80,0.1);
+    color: rgba(255,100,100,0.6);
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .song-delete:hover {
+    background: rgba(255,80,80,0.25);
+    color: rgba(255,100,100,0.9);
+  }
+
+  .song-rename {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: rgba(212,175,55,0.1);
+    color: rgba(212,175,55,0.6);
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .song-rename:hover {
+    background: rgba(212,175,55,0.25);
+    color: rgba(212,175,55,0.9);
+  }
+
+  .song-name-input {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(212,175,55,0.4);
+    border-radius: 6px;
+    color: #d4af37;
+    font-family: 'Georgia', serif;
+    font-size: 13px;
+    padding: 4px 8px;
+    width: 100%;
+    outline: none;
+  }
+
+  .song-name-input:focus {
+    border-color: rgba(212,175,55,0.7);
+  }
+
+  .vinyl-hint {
+    font-size: 10px;
+    opacity: 0.35;
+    margin-top: 2px;
+    font-style: italic;
+  }
+
+  /* Color picker */
+  .color-picker-section {
+    width: 100%;
+    max-width: 340px;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  .color-picker-label {
+    font-size: 13px;
+    opacity: 0.6;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+  }
+
+  .color-options {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .color-swatch {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.1);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .color-swatch:hover {
+    transform: scale(1.15);
+  }
+
+  .color-swatch.selected {
+    border-color: #d4af37;
+    box-shadow: 0 0 10px rgba(212,175,55,0.5);
+  }
+
+  .color-swatch.selected::after {
+    content: '\2713';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 16px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  }
+
+  /* Creator modal */
+  .creator-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 100;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  .creator-overlay.active {
+    display: flex;
+  }
+
+  .creator-modal {
+    width: 100%;
+    max-width: 360px;
+    background: #12121f;
+    border: 1px solid rgba(212,175,55,0.3);
+    border-radius: 16px;
+    padding: 24px 20px;
+  }
+
+  .creator-title {
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 18px;
+    letter-spacing: 2px;
+  }
+
+  .creator-label {
+    display: block;
+    font-size: 12px;
+    opacity: 0.6;
+    margin-bottom: 8px;
+    margin-top: 16px;
+    letter-spacing: 1px;
+  }
+
+  .creator-label:first-of-type {
+    margin-top: 0;
+  }
+
+  .creator-hint {
+    opacity: 0.5;
+    font-size: 10px;
+  }
+
+  .creator-input {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(212,175,55,0.3);
+    border-radius: 10px;
+    color: #d4af37;
+    font-family: 'Georgia', serif;
+    font-size: 14px;
+    padding: 10px 14px;
+    outline: none;
+  }
+
+  .creator-input:focus {
+    border-color: rgba(212,175,55,0.6);
+  }
+
+  .creator-file-btn {
+    width: 100%;
+    padding: 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px dashed rgba(212,175,55,0.3);
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 13px;
+    opacity: 0.7;
+    transition: all 0.2s;
+  }
+
+  .creator-file-btn:hover {
+    border-color: rgba(212,175,55,0.6);
+    background: rgba(212,175,55,0.05);
+  }
+
+  .creator-file-btn.has-file {
+    border-style: solid;
+    border-color: rgba(212,175,55,0.5);
+    opacity: 1;
+  }
+
+  .image-preview-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+
+  .image-preview-item {
+    position: relative;
+    width: 50px;
+    height: 50px;
+  }
+
+  .image-preview-item img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid rgba(212,175,55,0.3);
+  }
+
+  .image-preview-item .img-remove {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(255,80,80,0.85);
+    color: #fff;
+    border: none;
+    font-size: 12px;
+    line-height: 18px;
+    text-align: center;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  /* Particle picker */
+  .particle-options {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .particle-option {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    border: 2px solid rgba(212,175,55,0.15);
+    background: rgba(255,255,255,0.03);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .particle-option:hover {
+    border-color: rgba(212,175,55,0.4);
+    background: rgba(212,175,55,0.05);
+  }
+
+  .particle-option.selected {
+    border-color: #d4af37;
+    background: rgba(212,175,55,0.12);
+    box-shadow: 0 0 8px rgba(212,175,55,0.3);
+  }
+
+  /* Box list item color indicator */
+  .box-color-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: rgba(212,175,55,0.9);
+    color: #0a0a15;
+    padding: 10px 24px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: bold;
+    transition: transform 0.3s;
+    z-index: 200;
+  }
+
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── Trimmer Modal ── */
+  .trimmer-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 100;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .trimmer-overlay.active {
+    display: flex;
+  }
+
+  .trimmer-modal {
+    width: 100%;
+    max-width: 360px;
+    background: #12121f;
+    border: 1px solid rgba(212,175,55,0.3);
+    border-radius: 16px;
+    padding: 24px 20px;
+  }
+
+  .trimmer-title {
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 4px;
+    letter-spacing: 2px;
+  }
+
+  .trimmer-subtitle {
+    font-size: 12px;
+    text-align: center;
+    opacity: 0.4;
+    margin-bottom: 20px;
+  }
+
+  /* Waveform area */
+  .waveform-container {
+    position: relative;
+    width: 100%;
+    height: 100px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 6px;
+    touch-action: none;
+  }
+
+  .waveform-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Dim overlay for regions outside selection */
+  .trim-overlay-left, .trim-overlay-right {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    pointer-events: none;
+  }
+
+  .trim-overlay-left { left: 0; }
+  .trim-overlay-right { right: 0; }
+
+  /* Handles */
+  .trim-handle {
+    position: absolute;
+    top: 0;
+    width: 16px;
+    height: 100%;
+    cursor: ew-resize;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: none;
+  }
+
+  .trim-handle::before {
+    content: '';
+    width: 4px;
+    height: 36px;
+    background: #d4af37;
+    border-radius: 2px;
+    box-shadow: 0 0 8px rgba(212,175,55,0.5);
+  }
+
+  .trim-handle-left {
+    background: linear-gradient(to right, rgba(212,175,55,0.25), transparent);
+  }
+
+  .trim-handle-right {
+    background: linear-gradient(to left, rgba(212,175,55,0.25), transparent);
+  }
+
+  /* Playhead */
+  .playhead {
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: #fff;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 4;
+    transition: opacity 0.2s;
+  }
+
+  .playhead.active {
+    opacity: 0.8;
+  }
+
+  /* Time labels */
+  .trim-times {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    opacity: 0.5;
+    margin-bottom: 16px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .trim-selection-info {
+    text-align: center;
+    font-size: 13px;
+    margin-bottom: 18px;
+    opacity: 0.7;
+  }
+
+  /* Preview button */
+  .trim-preview-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: 10px;
+    color: #d4af37;
+    font-family: 'Georgia', serif;
+    font-size: 13px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+  }
+
+  .trim-preview-btn:hover {
+    background: rgba(212,175,55,0.1);
+  }
+
+  /* Action buttons */
+  .trimmer-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .trimmer-actions button {
+    flex: 1;
+    padding: 14px;
+    border-radius: 10px;
+    font-family: 'Georgia', serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+    border: none;
+  }
+
+  .trim-cancel {
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.5);
+    border: 1px solid rgba(255,255,255,0.1) !important;
+  }
+
+  .trim-cancel:hover {
+    background: rgba(255,255,255,0.1);
+  }
+
+  .trim-confirm {
+    background: linear-gradient(135deg, rgba(212,175,55,0.3), rgba(139,69,19,0.3));
+    color: #d4af37;
+    border: 1px solid rgba(212,175,55,0.4) !important;
+  }
+
+  .trim-confirm:hover:not(:disabled) {
+    background: linear-gradient(135deg, rgba(212,175,55,0.45), rgba(139,69,19,0.4));
+  }
+
+  .trim-confirm:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+</style>
+</head>
+<body>
+
+<h1></h1>
+<p class="subtitle">wind it up, let it play</p>
+
+<div class="upload-area" id="createBtn">
+  <div class="upload-icon">+</div>
+  <div class="upload-text">
+    tap to create a music box
+  </div>
+</div>
+
+<ul class="song-list" id="boxList"></ul>
+
+<!-- Create Music Box Modal -->
+<div class="creator-overlay" id="creatorOverlay">
+  <div class="creator-modal">
+    <div class="creator-title" id="creatorTitle">Create Music Box</div>
+
+    <label class="creator-label">Name <span class="vinyl-hint">(displayed on vinyl)</span></label>
+    <input class="creator-input" type="text" id="boxNameInput" placeholder="My Music Box">
+
+    <label class="creator-label">Colour</label>
+    <div class="color-options" id="colorOptions">
+      <div class="color-swatch selected" data-color="classic" style="background: linear-gradient(135deg, #8B4513, #A0522D);" title="Classic Brown"></div>
+      <div class="color-swatch" data-color="mahogany" style="background: linear-gradient(135deg, #4A0000, #800020);" title="Mahogany"></div>
+      <div class="color-swatch" data-color="ebony" style="background: linear-gradient(135deg, #1a1a1a, #333);" title="Ebony"></div>
+      <div class="color-swatch" data-color="ivory" style="background: linear-gradient(135deg, #FFFFF0, #D2B48C);" title="Ivory"></div>
+      <div class="color-swatch" data-color="navy" style="background: linear-gradient(135deg, #0a1628, #1a3a5c);" title="Navy"></div>
+      <div class="color-swatch" data-color="rosewood" style="background: linear-gradient(135deg, #65000B, #8B2252);" title="Rosewood"></div>
+    </div>
+
+    <label class="creator-label">Sound <small class="creator-hint">MP3, WAV, OGG, M4A</small></label>
+    <div class="creator-file-btn" id="audioUploadBtn">
+      <span id="audioFileName">Choose audio file</span>
+    </div>
+    <input type="file" id="fileInput" accept="audio/*" style="display:none">
+
+    <label class="creator-label">Photos <small class="creator-hint">optional, displayed inside lid</small></label>
+    <div class="creator-file-btn" id="imageUploadBtn">
+      <span id="imageFileCount">Choose images</span>
+    </div>
+    <input type="file" id="imageInput" accept="image/*" multiple style="display:none">
+    <div class="image-preview-row" id="imagePreviewRow"></div>
+
+    <label class="creator-label">Particles</label>
+    <div class="particle-options" id="particleOptions">
+      <div class="particle-option selected" data-particles="notes" title="Music Notes">&#9835;</div>
+      <div class="particle-option" data-particles="hearts" title="Hearts">&#10084;</div>
+      <div class="particle-option" data-particles="flowers" title="Flowers">&#10047;</div>
+    </div>
+
+    <div class="trimmer-actions" style="margin-top:20px">
+      <button class="trim-cancel" id="createCancel">Cancel</button>
+      <button class="trim-confirm" id="createConfirm" disabled>Create</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Trimmer Modal -->
+<div class="trimmer-overlay" id="trimmerOverlay">
+  <div class="trimmer-modal">
+    <div class="trimmer-title">Trim Audio</div>
+    <div class="trimmer-subtitle" id="trimmerSubtitle">Drag handles to select a section</div>
+
+    <div class="waveform-container" id="waveformContainer">
+      <canvas class="waveform-canvas" id="waveformCanvas"></canvas>
+      <div class="trim-overlay-left" id="trimOverlayLeft"></div>
+      <div class="trim-overlay-right" id="trimOverlayRight"></div>
+      <div class="trim-handle trim-handle-left" id="handleLeft"></div>
+      <div class="trim-handle trim-handle-right" id="handleRight"></div>
+      <div class="playhead" id="playhead"></div>
+    </div>
+
+    <div class="trim-times">
+      <span id="trimStartTime">0:00</span>
+      <span id="trimEndTime">0:00</span>
+    </div>
+
+    <div class="trim-selection-info" id="trimSelectionInfo">Selected: 0:00 — 0:00 (0s)</div>
+
+    <button class="trim-preview-btn" id="trimPreviewBtn">Preview selection</button>
+
+    <div class="trimmer-actions">
+      <button class="trim-cancel" id="trimCancel">Cancel</button>
+      <button class="trim-confirm" id="trimConfirm">Use selection</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  const DB_NAME = 'musicbox_db';
+  const STORE_NAME = 'songs';
+  let db = null;
+
+  // ── IndexedDB ──
+  function openDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+        }
+      };
+      req.onsuccess = (e) => { db = e.target.result; resolve(db); };
+      req.onerror = (e) => reject(e);
+    });
+  }
+
+  function addSong(song) {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.add(song);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = (e) => reject(e);
+    });
+  }
+
+  function deleteSong(id) {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.delete(id);
+      req.onsuccess = () => resolve();
+      req.onerror = (e) => reject(e);
+    });
+  }
+
+  function updateSong(id, updates) {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      const getReq = store.get(id);
+      getReq.onsuccess = () => {
+        const song = getReq.result;
+        Object.assign(song, updates);
+        const putReq = store.put(song);
+        putReq.onsuccess = () => resolve();
+        putReq.onerror = (e) => reject(e);
+      };
+      getReq.onerror = (e) => reject(e);
+    });
+  }
+
+  function getAllSongs() {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = (e) => reject(e);
+    });
+  }
+
+  // ── UI ──
+  const createBtn = document.getElementById('createBtn');
+  const fileInput = document.getElementById('fileInput');
+  const imageInput = document.getElementById('imageInput');
+  const boxList = document.getElementById('boxList');
+  const toast = document.getElementById('toast');
+
+  const creatorOverlay = document.getElementById('creatorOverlay');
+  const boxNameInput = document.getElementById('boxNameInput');
+  const colorOptions = document.getElementById('colorOptions');
+  const audioUploadBtn = document.getElementById('audioUploadBtn');
+  const audioFileName = document.getElementById('audioFileName');
+  const imageUploadBtn = document.getElementById('imageUploadBtn');
+  const imageFileCount = document.getElementById('imageFileCount');
+  const imagePreviewRow = document.getElementById('imagePreviewRow');
+  const createCancel = document.getElementById('createCancel');
+  const createConfirm = document.getElementById('createConfirm');
+
+  let selectedColor = 'classic';
+  let selectedParticles = 'notes';
+  let pendingAudio = null;
+  let pendingImages = [];
+  let editingBoxId = null; // null = create mode, number = edit mode
+
+  const particleOptions = document.getElementById('particleOptions');
+
+  // ── Color picker ──
+  colorOptions.addEventListener('click', (e) => {
+    const swatch = e.target.closest('.color-swatch');
+    if (!swatch) return;
+    colorOptions.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+    swatch.classList.add('selected');
+    selectedColor = swatch.dataset.color;
+  });
+
+  // ── Particle picker ──
+  particleOptions.addEventListener('click', (e) => {
+    const opt = e.target.closest('.particle-option');
+    if (!opt) return;
+    particleOptions.querySelectorAll('.particle-option').forEach(o => o.classList.remove('selected'));
+    opt.classList.add('selected');
+    selectedParticles = opt.dataset.particles;
+  });
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  }
+
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  }
+
+  function formatDuration(seconds) {
+    if (seconds < 60) return Math.round(seconds) + 's';
+    const m = Math.floor(seconds / 60);
+    const s = Math.round(seconds % 60);
+    return `${m}m ${s}s`;
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  const colorSwatchBgs = {
+    classic: '#8B4513', mahogany: '#4A0000', ebony: '#1a1a1a',
+    ivory: '#D2C6A0', navy: '#0a1628', rosewood: '#65000B'
+  };
+
+  // ── Render box list ──
+  async function renderBoxes() {
+    const boxes = await getAllSongs();
+    boxList.innerHTML = '';
+    for (const box of boxes) {
+      const li = document.createElement('li');
+      li.className = 'song-item';
+
+      const durText = box.duration ? ` · ${formatDuration(box.duration)}` : '';
+      const imgCount = box.images ? box.images.length : 0;
+      const imgText = imgCount > 0 ? ` · ${imgCount} photo${imgCount > 1 ? 's' : ''}` : '';
+      const dotColor = colorSwatchBgs[box.color] || colorSwatchBgs.classic;
+
+      li.innerHTML = `
+        <div class="song-icon">&#9835;</div>
+        <div class="song-info">
+          <div class="song-name">${escapeHtml(box.name)}</div>
+          <div class="song-meta">${formatSize(box.size)}${durText}${imgText}</div>
+        </div>
+        <div class="box-color-dot" style="background:${dotColor}"></div>
+        <button class="song-rename" data-id="${box.id}" title="Rename">&#9998;</button>
+        <button class="song-delete" data-id="${box.id}">&times;</button>
+      `;
+
+      li.addEventListener('click', (e) => {
+        if (e.target.closest('.song-delete') || e.target.closest('.song-rename')) return;
+        window.location.href = `player.html?song=${box.id}&color=${box.color || 'classic'}&particles=${box.particles || 'notes'}`;
+      });
+
+      li.querySelector('.song-rename').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        openEditor(box);
+      });
+
+      li.querySelector('.song-delete').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await deleteSong(box.id);
+        showToast('Music box removed');
+        renderBoxes();
+      });
+
+      boxList.appendChild(li);
+    }
+  }
+
+  // ── Creator/Editor modal ──
+  const creatorTitle = document.getElementById('creatorTitle');
+
+  function openCreator() {
+    editingBoxId = null;
+    pendingAudio = null;
+    pendingImages = [];
+    boxNameInput.value = '';
+    audioFileName.textContent = 'Choose audio file';
+    audioUploadBtn.classList.remove('has-file');
+    imageFileCount.textContent = 'Choose images';
+    imageUploadBtn.classList.remove('has-file');
+    imagePreviewRow.innerHTML = '';
+    createConfirm.disabled = true;
+    createConfirm.textContent = 'Create';
+    creatorTitle.textContent = 'Create Music Box';
+    selectedColor = 'classic';
+    colorOptions.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+    colorOptions.querySelector('[data-color="classic"]').classList.add('selected');
+    selectedParticles = 'notes';
+    particleOptions.querySelectorAll('.particle-option').forEach(o => o.classList.remove('selected'));
+    particleOptions.querySelector('[data-particles="notes"]').classList.add('selected');
+    creatorOverlay.classList.add('active');
+  }
+
+  function openEditor(box) {
+    editingBoxId = box.id;
+    creatorTitle.textContent = 'Edit Music Box';
+    createConfirm.textContent = 'Save';
+
+    // Pre-fill name
+    boxNameInput.value = box.name || '';
+
+    // Pre-fill color
+    selectedColor = box.color || 'classic';
+    colorOptions.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+    const swatch = colorOptions.querySelector(`[data-color="${selectedColor}"]`);
+    if (swatch) swatch.classList.add('selected');
+
+    // Pre-fill particles
+    selectedParticles = box.particles || 'notes';
+    particleOptions.querySelectorAll('.particle-option').forEach(o => o.classList.remove('selected'));
+    const pOpt = particleOptions.querySelector(`[data-particles="${selectedParticles}"]`);
+    if (pOpt) pOpt.classList.add('selected');
+
+    // Pre-fill audio (keep existing)
+    pendingAudio = {
+      arrayBuffer: box.data,
+      fileName: box.fileName,
+      size: box.size,
+      type: box.type,
+      duration: box.duration,
+    };
+    audioFileName.textContent = box.fileName || 'Current audio';
+    audioUploadBtn.classList.add('has-file');
+
+    // Pre-fill images
+    pendingImages = [];
+    imagePreviewRow.innerHTML = '';
+    if (box.images && box.images.length > 0) {
+      box.images.forEach(dataUrl => {
+        pendingImages.push({ dataUrl, name: 'existing' });
+        addImagePreview(dataUrl);
+      });
+    }
+    updateImageCount();
+
+    createConfirm.disabled = false;
+    creatorOverlay.classList.add('active');
+  }
+
+  function closeCreator() {
+    creatorOverlay.classList.remove('active');
+    editingBoxId = null;
+  }
+
+  createBtn.addEventListener('click', openCreator);
+  createCancel.addEventListener('click', closeCreator);
+
+  // Audio upload
+  audioUploadBtn.addEventListener('click', () => fileInput.click());
+
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    fileInput.value = '';
+
+    if (!file.type.startsWith('audio/')) {
+      showToast('Please upload an audio file');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const arrayBuffer = e.target.result;
+
+      const tempCtx = new (window.AudioContext || window.webkitAudioContext)();
+      let decoded;
+      try {
+        decoded = await tempCtx.decodeAudioData(arrayBuffer.slice(0));
+      } catch (err) {
+        showToast('Could not decode audio file');
+        tempCtx.close();
+        return;
+      }
+
+      const duration = decoded.duration;
+
+      if (duration > 60) {
+        openTrimmer(file, arrayBuffer, decoded, tempCtx);
+      } else {
+        tempCtx.close();
+        pendingAudio = {
+          arrayBuffer,
+          fileName: file.name,
+          size: file.size,
+          type: file.type,
+          duration,
+        };
+        audioFileName.textContent = file.name;
+        audioUploadBtn.classList.add('has-file');
+        if (!boxNameInput.value.trim()) {
+          boxNameInput.value = file.name.replace(/\.[^/.]+$/, '');
+        }
+        createConfirm.disabled = false;
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  });
+
+  // Image helpers
+  function addImagePreview(dataUrl) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'image-preview-item';
+    const img = document.createElement('img');
+    img.src = dataUrl;
+    const btn = document.createElement('button');
+    btn.className = 'img-remove';
+    btn.textContent = '\u00d7';
+    btn.addEventListener('click', () => {
+      const idx = Array.from(imagePreviewRow.children).indexOf(wrapper);
+      if (idx > -1) pendingImages.splice(idx, 1);
+      wrapper.remove();
+      updateImageCount();
+    });
+    wrapper.appendChild(img);
+    wrapper.appendChild(btn);
+    imagePreviewRow.appendChild(wrapper);
+  }
+
+  function updateImageCount() {
+    if (pendingImages.length > 0) {
+      imageFileCount.textContent = `${pendingImages.length} image${pendingImages.length > 1 ? 's' : ''} selected`;
+      imageUploadBtn.classList.add('has-file');
+    } else {
+      imageFileCount.textContent = 'Choose images';
+      imageUploadBtn.classList.remove('has-file');
+    }
+  }
+
+  // Image upload
+  imageUploadBtn.addEventListener('click', () => imageInput.click());
+
+  imageInput.addEventListener('change', () => {
+    const files = Array.from(imageInput.files);
+    imageInput.value = '';
+    if (!files.length) return;
+
+    pendingImages = [];
+    imagePreviewRow.innerHTML = '';
+
+    for (const file of files) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        pendingImages.push({ dataUrl: e.target.result, name: file.name });
+        addImagePreview(e.target.result);
+        updateImageCount();
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // Create/Save confirm
+  createConfirm.addEventListener('click', async () => {
+    if (!pendingAudio) return;
+
+    const name = boxNameInput.value.trim() || pendingAudio.fileName.replace(/\.[^/.]+$/, '');
+
+    if (editingBoxId != null) {
+      // Edit mode — update existing box
+      await updateSong(editingBoxId, {
+        name,
+        fileName: pendingAudio.fileName,
+        size: pendingAudio.size,
+        type: pendingAudio.type,
+        data: pendingAudio.arrayBuffer,
+        duration: pendingAudio.duration,
+        color: selectedColor,
+        particles: selectedParticles,
+        images: pendingImages.map(img => img.dataUrl),
+      });
+      closeCreator();
+      showToast('Music box updated!');
+    } else {
+      // Create mode
+      await addSong({
+        name,
+        fileName: pendingAudio.fileName,
+        size: pendingAudio.size,
+        type: pendingAudio.type,
+        data: pendingAudio.arrayBuffer,
+        duration: pendingAudio.duration,
+        color: selectedColor,
+        particles: selectedParticles,
+        images: pendingImages.map(img => img.dataUrl),
+        addedAt: Date.now(),
+      });
+      closeCreator();
+      showToast('Music box created!');
+    }
+
+    renderBoxes();
+  });
+
+  // ══════════════════════════════════════
+  // ── TRIMMER ──
+  // ══════════════════════════════════════
+  const trimmerOverlay = document.getElementById('trimmerOverlay');
+  const waveformContainer = document.getElementById('waveformContainer');
+  const waveformCanvas = document.getElementById('waveformCanvas');
+  const handleLeft = document.getElementById('handleLeft');
+  const handleRight = document.getElementById('handleRight');
+  const trimOverlayLeft = document.getElementById('trimOverlayLeft');
+  const trimOverlayRight = document.getElementById('trimOverlayRight');
+  const trimStartTime = document.getElementById('trimStartTime');
+  const trimEndTime = document.getElementById('trimEndTime');
+  const trimSelectionInfo = document.getElementById('trimSelectionInfo');
+  const trimPreviewBtn = document.getElementById('trimPreviewBtn');
+  const trimCancel = document.getElementById('trimCancel');
+  const trimConfirm = document.getElementById('trimConfirm');
+  const trimmerSubtitle = document.getElementById('trimmerSubtitle');
+  const playhead = document.getElementById('playhead');
+
+  let trimState = null; // { file, arrayBuffer, decoded, audioCtx, startPct, endPct }
+  let dragging = null;  // 'left' | 'right' | null
+  let previewSource = null;
+  let previewTimer = null;
+
+  function openTrimmer(file, arrayBuffer, decoded, audioCtx) {
+    trimState = {
+      file,
+      arrayBuffer,
+      decoded,
+      audioCtx,
+      startPct: 0,
+      endPct: 1,
+    };
+
+    trimmerSubtitle.textContent = `${escapeHtml(file.name)} — ${formatDuration(decoded.duration)}`;
+    trimmerOverlay.classList.add('active');
+
+    drawWaveform();
+    updateTrimUI();
+  }
+
+  function closeTrimmer() {
+    trimmerOverlay.classList.remove('active');
+    stopPreview();
+    if (trimState && trimState.audioCtx) {
+      trimState.audioCtx.close();
+    }
+    trimState = null;
+  }
+
+  function drawWaveform() {
+    const canvas = waveformCanvas;
+    const rect = waveformContainer.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    const w = rect.width;
+    const h = rect.height;
+
+    ctx.clearRect(0, 0, w, h);
+
+    const data = trimState.decoded.getChannelData(0);
+    const step = Math.ceil(data.length / w);
+    const mid = h / 2;
+
+    ctx.fillStyle = '#d4af37';
+
+    for (let i = 0; i < w; i++) {
+      let min = 1, max = -1;
+      const start = i * step;
+      for (let j = 0; j < step && start + j < data.length; j++) {
+        const val = data[start + j];
+        if (val < min) min = val;
+        if (val > max) max = val;
+      }
+      const barTop = mid + min * mid;
+      const barHeight = (max - min) * mid;
+      ctx.globalAlpha = 0.6;
+      ctx.fillRect(i, barTop, 1, Math.max(1, barHeight));
+    }
+
+    ctx.globalAlpha = 1;
+  }
+
+  function updateTrimUI() {
+    if (!trimState) return;
+
+    const containerW = waveformContainer.getBoundingClientRect().width;
+    const leftPx = trimState.startPct * containerW;
+    const rightPx = trimState.endPct * containerW;
+
+    handleLeft.style.left = (leftPx - 8) + 'px';
+    handleRight.style.left = (rightPx - 8) + 'px';
+
+    trimOverlayLeft.style.width = leftPx + 'px';
+    trimOverlayRight.style.width = (containerW - rightPx) + 'px';
+
+    const dur = trimState.decoded.duration;
+    const startSec = trimState.startPct * dur;
+    const endSec = trimState.endPct * dur;
+    const selDur = endSec - startSec;
+
+    trimStartTime.textContent = formatTime(startSec);
+    trimEndTime.textContent = formatTime(endSec);
+
+    const tooLong = selDur >= 60;
+    trimSelectionInfo.textContent = tooLong
+      ? `Selected: ${formatTime(startSec)} — ${formatTime(endSec)} (${formatDuration(selDur)}) — must be under 1 min`
+      : `Selected: ${formatTime(startSec)} — ${formatTime(endSec)} (${formatDuration(selDur)})`;
+    trimConfirm.disabled = tooLong;
+  }
+
+  // ── Handle dragging ──
+  function getHandlePct(e) {
+    const rect = waveformContainer.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+  }
+
+  function onHandleStart(which, e) {
+    e.preventDefault();
+    e.stopPropagation();
+    dragging = which;
+    if (isPreviewing) {
+      isPreviewing = false;
+      stopPreview();
+    }
+  }
+
+  handleLeft.addEventListener('mousedown', (e) => onHandleStart('left', e));
+  handleLeft.addEventListener('touchstart', (e) => onHandleStart('left', e), { passive: false });
+  handleRight.addEventListener('mousedown', (e) => onHandleStart('right', e));
+  handleRight.addEventListener('touchstart', (e) => onHandleStart('right', e), { passive: false });
+
+  function onDragMove(e) {
+    if (!dragging || !trimState) return;
+    e.preventDefault();
+
+    const pct = getHandlePct(e);
+    const minGap = 5 / trimState.decoded.duration; // minimum 5 seconds selection
+
+    if (dragging === 'left') {
+      trimState.startPct = Math.min(pct, trimState.endPct - minGap);
+      trimState.startPct = Math.max(0, trimState.startPct);
+    } else {
+      trimState.endPct = Math.max(pct, trimState.startPct + minGap);
+      trimState.endPct = Math.min(1, trimState.endPct);
+    }
+
+    updateTrimUI();
+  }
+
+  function onDragEnd() {
+    dragging = null;
+  }
+
+  window.addEventListener('mousemove', onDragMove);
+  window.addEventListener('mouseup', onDragEnd);
+  window.addEventListener('touchmove', onDragMove, { passive: false });
+  window.addEventListener('touchend', onDragEnd);
+
+  // ── Preview ──
+  function stopPreview() {
+    if (previewSource) {
+      try { previewSource.stop(); } catch(e) {}
+      previewSource = null;
+    }
+    if (previewTimer) {
+      cancelAnimationFrame(previewTimer);
+      previewTimer = null;
+    }
+    playhead.classList.remove('active');
+    trimPreviewBtn.textContent = 'Preview selection';
+  }
+
+  let isPreviewing = false;
+
+  trimPreviewBtn.addEventListener('click', () => {
+    if (isPreviewing) {
+      isPreviewing = false;
+      stopPreview();
+      return;
+    }
+
+    if (!trimState) return;
+    stopPreview();
+
+    isPreviewing = true;
+    trimPreviewBtn.textContent = 'Stop preview';
+
+    const ctx = trimState.audioCtx;
+    if (ctx.state === 'suspended') ctx.resume();
+
+    const startSec = trimState.startPct * trimState.decoded.duration;
+    const endSec = trimState.endPct * trimState.decoded.duration;
+    const dur = endSec - startSec;
+
+    previewSource = ctx.createBufferSource();
+    previewSource.buffer = trimState.decoded;
+    previewSource.connect(ctx.destination);
+    previewSource.start(0, startSec, dur);
+
+    const playStartTime = ctx.currentTime;
+    playhead.classList.add('active');
+
+    function animatePlayhead() {
+      const elapsed = ctx.currentTime - playStartTime;
+      if (elapsed >= dur) {
+        stopPreview();
+        isPreviewing = false;
+        return;
+      }
+      const pct = trimState.startPct + (elapsed / dur) * (trimState.endPct - trimState.startPct);
+      const containerW = waveformContainer.getBoundingClientRect().width;
+      playhead.style.left = (pct * containerW) + 'px';
+      previewTimer = requestAnimationFrame(animatePlayhead);
+    }
+
+    animatePlayhead();
+
+    previewSource.onended = () => {
+      isPreviewing = false;
+      stopPreview();
+    };
+  });
+
+  // ── Cancel / Confirm ──
+  trimCancel.addEventListener('click', () => {
+    closeTrimmer();
+  });
+
+  trimConfirm.addEventListener('click', async () => {
+    if (!trimState) return;
+
+    const { file, decoded, startPct, endPct } = trimState;
+    const startSec = startPct * decoded.duration;
+    const endSec = endPct * decoded.duration;
+    const trimDuration = endSec - startSec;
+
+    // Create a trimmed AudioBuffer
+    const sampleRate = decoded.sampleRate;
+    const channels = decoded.numberOfChannels;
+    const startSample = Math.floor(startSec * sampleRate);
+    const endSample = Math.floor(endSec * sampleRate);
+    const trimmedLength = endSample - startSample;
+
+    const offlineCtx = new OfflineAudioContext(channels, trimmedLength, sampleRate);
+    const source = offlineCtx.createBufferSource();
+    source.buffer = decoded;
+    source.connect(offlineCtx.destination);
+    source.start(0, startSec, trimDuration);
+
+    const renderedBuffer = await offlineCtx.startRendering();
+
+    // Encode trimmed audio as WAV
+    const wavArrayBuffer = audioBufferToWav(renderedBuffer);
+
+    pendingAudio = {
+      arrayBuffer: wavArrayBuffer,
+      fileName: file.name,
+      size: wavArrayBuffer.byteLength,
+      type: 'audio/wav',
+      duration: trimDuration,
+    };
+    audioFileName.textContent = `${file.name} (trimmed ${formatTime(startSec)}-${formatTime(endSec)})`;
+    audioUploadBtn.classList.add('has-file');
+    if (!boxNameInput.value.trim()) {
+      boxNameInput.value = file.name.replace(/\.[^/.]+$/, '');
+    }
+    createConfirm.disabled = false;
+
+    closeTrimmer();
+    showToast('Audio trimmed!');
+  });
+
+  // ── WAV encoder ──
+  function audioBufferToWav(buffer) {
+    const numChannels = buffer.numberOfChannels;
+    const sampleRate = buffer.sampleRate;
+    const format = 1; // PCM
+    const bitDepth = 16;
+
+    let interleaved;
+    if (numChannels === 1) {
+      interleaved = buffer.getChannelData(0);
+    } else {
+      const left = buffer.getChannelData(0);
+      const right = buffer.getChannelData(1);
+      interleaved = new Float32Array(left.length + right.length);
+      for (let i = 0; i < left.length; i++) {
+        interleaved[i * 2] = left[i];
+        interleaved[i * 2 + 1] = right[i];
+      }
+    }
+
+    const dataLength = interleaved.length * (bitDepth / 8);
+    const headerLength = 44;
+    const arrayBuffer = new ArrayBuffer(headerLength + dataLength);
+    const view = new DataView(arrayBuffer);
+
+    // WAV header
+    writeString(view, 0, 'RIFF');
+    view.setUint32(4, 36 + dataLength, true);
+    writeString(view, 8, 'WAVE');
+    writeString(view, 12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, format, true);
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * numChannels * (bitDepth / 8), true);
+    view.setUint16(32, numChannels * (bitDepth / 8), true);
+    view.setUint16(34, bitDepth, true);
+    writeString(view, 36, 'data');
+    view.setUint32(40, dataLength, true);
+
+    // Write samples
+    let offset = 44;
+    for (let i = 0; i < interleaved.length; i++) {
+      const sample = Math.max(-1, Math.min(1, interleaved[i]));
+      const val = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+      view.setInt16(offset, val, true);
+      offset += 2;
+    }
+
+    return arrayBuffer;
+  }
+
+  function writeString(view, offset, str) {
+    for (let i = 0; i < str.length; i++) {
+      view.setUint8(offset + i, str.charCodeAt(i));
+    }
+  }
+
+  // ── Init ──
+  openDB().then(() => renderBoxes());
+})();
+</script>
+</body>
+</html>
