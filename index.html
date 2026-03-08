@@ -756,11 +756,14 @@
   // ── IndexedDB ──
   function openDB() {
     return new Promise((resolve, reject) => {
-      const req = indexedDB.open(DB_NAME, 1);
+      const req = indexedDB.open(DB_NAME, 2);
       req.onupgradeneeded = (e) => {
         const db = e.target.result;
         if (!db.objectStoreNames.contains(STORE_NAME)) {
           db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+        }
+        if (!db.objectStoreNames.contains('shared_songs')) {
+          db.createObjectStore('shared_songs', { keyPath: 'id', autoIncrement: true });
         }
       };
       req.onsuccess = (e) => { db = e.target.result; resolve(db); };
@@ -1123,7 +1126,10 @@
 
   // Create/Save confirm
   createConfirm.addEventListener('click', async () => {
-    if (!pendingAudio) return;
+    if (!pendingAudio) {
+      showToast('Please upload audio first');
+      return;
+    }
 
     const name = boxNameInput.value.trim() || pendingAudio.fileName.replace(/\.[^/.]+$/, '');
 
@@ -1503,5 +1509,15 @@
   openDB().then(() => renderBoxes());
 })();
 </script>
+
+<div style="margin-top: 40px; padding: 16px 20px; text-align: center; max-width: 300px; font-size: 12px; letter-spacing: 0.5px; color: rgba(255,100,100,0.6); border: 1px solid rgba(255,100,100,0.15); border-radius: 8px; line-height: 1.5;">
+  all shared images and audio are publicly accessible. never upload sensitive or private data.
+</div>
+
+<div style="margin-top: 20px; padding: 20px; text-align: center; opacity: 0.6; font-size: 13px; letter-spacing: 0.5px; max-width: 300px;">
+  <p style="margin-bottom: 12px;">if you're happy with the product, scan to donate!</p>
+  <img src="qr.jpeg" alt="paylah qr code" style="width: 160px; height: 160px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2);">
+</div>
+
 </body>
 </html>

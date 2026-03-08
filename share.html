@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Music Box — Playing</title>
+<title>Music Box — Shared</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -24,111 +24,6 @@
     padding: 20px;
   }
 
-  .back-btn {
-    position: fixed;
-    top: 16px;
-    left: 16px;
-    background: none;
-    border: 1px solid rgba(212,175,55,0.3);
-    color: #d4af37;
-    font-family: 'Georgia', serif;
-    font-size: 13px;
-    padding: 8px 14px;
-    border-radius: 20px;
-    cursor: pointer;
-    z-index: 10;
-    letter-spacing: 1px;
-  }
-
-  .back-btn:hover { border-color: rgba(212,175,55,0.6); }
-
-  .share-btn {
-    position: fixed;
-    top: 16px;
-    right: 16px;
-    background: none;
-    border: 1px solid rgba(212,175,55,0.3);
-    color: #d4af37;
-    font-family: 'Georgia', serif;
-    font-size: 13px;
-    padding: 8px 14px;
-    border-radius: 20px;
-    cursor: pointer;
-    z-index: 10;
-    letter-spacing: 1px;
-  }
-  .share-btn:hover { border-color: rgba(212,175,55,0.6); }
-  .share-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  .share-modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
-  }
-  .share-modal-overlay.visible { display: flex; }
-
-  .share-modal {
-    background: #1a1a2e;
-    border: 1px solid rgba(212,175,55,0.3);
-    border-radius: 12px;
-    padding: 24px;
-    max-width: 420px;
-    width: 90%;
-    text-align: center;
-  }
-  .share-modal h3 {
-    margin-bottom: 12px;
-    font-size: 16px;
-    letter-spacing: 1px;
-  }
-  .share-modal p {
-    font-size: 13px;
-    opacity: 0.7;
-    margin-bottom: 16px;
-  }
-  .share-url-box {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-  .share-url-box input {
-    flex: 1;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(212,175,55,0.2);
-    color: #d4af37;
-    padding: 10px 12px;
-    border-radius: 8px;
-    font-family: monospace;
-    font-size: 12px;
-    outline: none;
-  }
-  .share-url-box button {
-    background: rgba(212,175,55,0.15);
-    border: 1px solid rgba(212,175,55,0.3);
-    color: #d4af37;
-    padding: 10px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: 'Georgia', serif;
-    font-size: 13px;
-    white-space: nowrap;
-  }
-  .share-url-box button:hover { background: rgba(212,175,55,0.25); }
-  .share-close {
-    margin-top: 16px;
-    background: none;
-    border: none;
-    color: rgba(212,175,55,0.5);
-    cursor: pointer;
-    font-family: 'Georgia', serif;
-    font-size: 12px;
-  }
-
-
   .music-box {
     position: relative;
     width: 280px;
@@ -139,7 +34,6 @@
     margin-bottom: auto;
   }
 
-  /* 3D scene wrapper */
   .box-scene {
     position: absolute;
     bottom: 0;
@@ -150,14 +44,12 @@
     transition: transform 10s ease;
   }
 
-  /* All 3D faces */
   .box-front, .box-back, .box-right, .box-left, .box-bottom,
   .lid-front, .lid-back, .lid-top, .lid-right, .lid-left, .lid-inner {
     position: absolute;
     backface-visibility: visible;
   }
 
-  /* The box body - 3D cube: 280w × 140h × 120d */
   .box-body {
     position: absolute;
     bottom: 0;
@@ -167,7 +59,6 @@
     z-index: 1;
   }
 
-  /* Front face */
   .box-front {
     width: 280px;
     height: 140px;
@@ -186,7 +77,6 @@
     border-radius: 4px;
   }
 
-  /* Back face */
   .box-back {
     width: 280px;
     height: 140px;
@@ -196,7 +86,6 @@
     transform: rotateY(180deg) translateZ(125px);
   }
 
-  /* Right face — centered: left:(280-120)/2=80 */
   .box-right {
     width: 250px;
     height: 140px;
@@ -214,7 +103,6 @@
     border-radius: 4px;
   }
 
-  /* Left face — centered: left:80 */
   .box-left {
     width: 250px;
     height: 140px;
@@ -232,7 +120,6 @@
     border-radius: 4px;
   }
 
-  /* Bottom face — centered: top:(140-160)/2=-10 */
   .box-bottom {
     width: 280px;
     height: 250px;
@@ -254,7 +141,6 @@
     text-shadow: 0 1px 2px rgba(0,0,0,0.5);
   }
 
-  /* The lid - 3D: 280w × 20h × 120d */
   .box-lid {
     position: absolute;
     bottom: 138px;
@@ -266,7 +152,6 @@
     z-index: 2;
   }
 
-  /* Lid front face */
   .lid-front {
     width: 280px;
     height: 20px;
@@ -276,7 +161,6 @@
     transform: translateZ(125px);
   }
 
-  /* Lid back face */
   .lid-back {
     width: 280px;
     height: 20px;
@@ -286,7 +170,6 @@
     transform: rotateY(180deg) translateZ(125px);
   }
 
-  /* Lid top face — flush with top edge of side panels (y=0) */
   .lid-top {
     width: 280px;
     height: 250px;
@@ -306,7 +189,6 @@
     border-radius: 4px;
   }
 
-  /* Lid photo circle */
   .lid-photo-container {
     position: absolute;
     top: 50%;
@@ -335,7 +217,6 @@
     opacity: 1;
   }
 
-  /* Lid right face — centered: left:80 */
   .lid-right {
     width: 250px;
     height: 20px;
@@ -346,7 +227,6 @@
     transform: rotateY(90deg) translateZ(140px);
   }
 
-  /* Lid left face — centered: left:80 */
   .lid-left {
     width: 250px;
     height: 20px;
@@ -357,7 +237,6 @@
     transform: rotateY(-90deg) translateZ(140px);
   }
 
-  /* Lid inner face (bottom of lid) — flush with bottom edge (y=20) */
   .lid-inner {
     width: 280px;
     height: 250px;
@@ -366,7 +245,6 @@
     transform: rotateX(90deg) translateZ(10px);
   }
 
-  /* Hinge detail */
   .box-hinge {
     position: absolute;
     width: 20px;
@@ -377,7 +255,6 @@
     z-index: 5;
   }
 
-  /* Metal latch on front */
   .box-latch {
     position: absolute;
     bottom: -6px;
@@ -391,7 +268,6 @@
     z-index: 3;
   }
 
-  /* Music box interior — 3D slab at top of box body */
   .box-interior {
     position: absolute;
     left: 2px;
@@ -407,7 +283,6 @@
     position: absolute;
   }
 
-  /* Top face of interior slab — holds the vinyl */
   .interior-top {
     width: 276px;
     height: 246px;
@@ -418,7 +293,6 @@
     transform-style: preserve-3d;
   }
 
-  /* Bottom face of interior slab */
   .interior-bottom {
     width: 276px;
     height: 246px;
@@ -427,7 +301,6 @@
     transform: rotateX(90deg) translateZ(10px);
   }
 
-  /* Front face of interior slab */
   .interior-front {
     width: 276px;
     height: 20px;
@@ -436,7 +309,6 @@
     transform: translateZ(123px);
   }
 
-  /* Back face of interior slab */
   .interior-back {
     width: 276px;
     height: 20px;
@@ -444,7 +316,6 @@
     transform: rotateY(180deg) translateZ(123px);
   }
 
-  /* Right face of interior slab */
   .interior-right {
     width: 246px;
     height: 20px;
@@ -453,7 +324,6 @@
     transform: rotateY(90deg) translateZ(138px);
   }
 
-  /* Left face of interior slab */
   .interior-left {
     width: 246px;
     height: 20px;
@@ -462,7 +332,6 @@
     transform: rotateY(-90deg) translateZ(138px);
   }
 
-  /* Vinyl record — 5px thick 3D disc sitting on interior-top */
   .record {
     position: absolute;
     width: 200px;
@@ -480,7 +349,6 @@
     border-radius: 50%;
   }
 
-  /* Top face of vinyl — visible grooves */
   .record-face-top {
     background:
       radial-gradient(circle, #d4af37 8px, #b8860b 11px, #8B6914 22px, #1a1a1a 25px, #222 27px, #111 35px, #1a1a1a 35.5px, #222 36px, #111 44px, #1a1a1a 44.5px, #222 45px, #111 53px, #1a1a1a 53.5px, #222 54px, #111 62px, #1a1a1a 62.5px, #222 63px, #111 71px, #1a1a1a 71.5px, #222 72px, #111 80px, #1a1a1a 80.5px, #222 81px, #111 88px, #1a1a1a 88.5px, #181818 89px, #111 100px);
@@ -488,7 +356,6 @@
     transform: translateZ(10px);
   }
 
-  /* Bottom face of vinyl — sits on the tan panel */
   .record-face-bottom {
     background: #0a0a0a;
     transform: translateZ(0px);
@@ -533,7 +400,6 @@
     font-weight: bold;
   }
 
-  /* Shadow on the ground */
   .box-shadow {
     position: absolute;
     bottom: -20px;
@@ -545,7 +411,6 @@
     pointer-events: none;
   }
 
-  /* Gentle idle sway */
   .box-scene {
     animation: idle-sway 6s ease-in-out infinite;
   }
@@ -555,7 +420,6 @@
     50% { transform: rotateX(calc(var(--viewX, -35deg) + 2deg)) rotateY(calc(var(--viewY, -20deg) + 2deg)); }
   }
 
-  /* View controls */
   .view-controls {
     display: flex;
     gap: 20px;
@@ -584,7 +448,6 @@
     color: rgba(212,175,55,0.5);
   }
 
-  /* Wind-up key — BELOW the box for mobile */
   .winding-section {
     margin-top: 30px;
     display: flex;
@@ -657,7 +520,6 @@
     letter-spacing: 1px;
   }
 
-  /* Status */
   .status {
     margin-top: 24px;
     text-align: center;
@@ -690,7 +552,6 @@
     width: 0%;
   }
 
-  /* Floating notes */
   .note {
     position: absolute;
     font-size: 18px;
@@ -708,20 +569,20 @@
 </head>
 <body>
 
-<button class="back-btn" onclick="window.location.href='index.html'">&larr; back</button>
-<button class="share-btn" id="shareBtn" style="display:none">share &rarr;</button>
-
-<div class="share-modal-overlay" id="shareOverlay">
-  <div class="share-modal">
-    <h3>Share your music box</h3>
-    <p>Anyone with this link can play your music box</p>
-    <div class="share-url-box">
-      <input type="text" id="shareUrlInput" readonly>
-      <button id="copyShareUrl">Copy</button>
-    </div>
-    <button class="share-close" id="shareClose">close</button>
-  </div>
+<!-- Loading overlay -->
+<div id="loadingOverlay" style="
+  position: fixed; inset: 0; z-index: 9999;
+  background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a15 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-family: 'Georgia', serif; color: #d4af37;
+">
+  <div style="width: 60px; height: 60px; border: 3px solid rgba(212,175,55,0.2); border-top-color: #d4af37; border-radius: 50%; animation: loader-spin 1s linear infinite; margin-bottom: 24px;"></div>
+  <div style="font-size: 18px; letter-spacing: 1px;">Loading music box...</div>
+  <div id="loadingDetail" style="font-size: 13px; opacity: 0.5; margin-top: 8px;"></div>
 </div>
+<style>
+  @keyframes loader-spin { to { transform: rotate(360deg); } }
+</style>
 
 <div class="music-box" id="musicBox">
   <div class="box-scene" id="boxScene">
@@ -781,7 +642,7 @@
 </div>
 
 <div class="status">
-  <div class="status-line" id="statusText">power up to play</div>
+  <div class="status-line" id="statusText">loading shared music box...</div>
   <div class="energy-bar-container">
     <div class="energy-bar" id="energyBar"></div>
   </div>
@@ -789,7 +650,7 @@
 </div>
 
 <div class="view-controls">
-  <label>Tilt <input type="range" id="viewX" min="-90" max="0" value="-35" step="1"><span id="viewXVal">-35°</span></label>
+  <label>Tilt <input type="range" id="viewX" min="-90" max="0" value="-35" step="1"><span id="viewXVal">-35&deg;</span></label>
 </div>
 
 <script>
@@ -801,7 +662,7 @@
 
   function updateView() {
     scene.style.setProperty('--viewX', viewX.value + 'deg');
-    viewXVal.textContent = viewX.value + '°';
+    viewXVal.textContent = viewX.value + '\u00B0';
   }
 
   viewX.addEventListener('input', updateView);
@@ -809,20 +670,20 @@
 })();
 
 (() => {
-  // ── Determine mode: uploaded song or default melody ──
+  // ── Get share ID from URL ──
   const params = new URLSearchParams(window.location.search);
-  const songId = params.get('song') ? parseInt(params.get('song')) : null;
-  const songSource = params.get('source') === 'shared' ? 'shared_songs' : 'songs';
-  const boxColor = params.get('color') || 'classic';
-  let boxParticles = params.get('particles') || 'notes';
+  const shareId = params.get('id');
+
+  if (!shareId) {
+    document.getElementById('statusText').textContent = 'No music box ID provided';
+    return;
+  }
 
   // ── Supabase ──
   const SUPABASE_URL = 'https://idtoiuwzitbgggmkvryy.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkdG9pdXd6aXRiZ2dnbWt2cnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NzM4MTgsImV4cCI6MjA4ODU0OTgxOH0.4ziW9Pllmlk7mUft-6A0HHOCMzIOQdIt7Hi-RBmC3ME';
 
-  let currentSong = null; // store loaded song data for sharing
-
-  // ── Apply box colour theme ──
+  // ── Color themes ──
   const colorThemes = {
     classic: { front: '#8B4513', mid: '#5C2E0A', dark: '#3E1A00', side: '#7A3B10', sideMid: '#52280A', sideDark: '#361800', left: '#9B5020', leftMid: '#6C3510', leftDark: '#4E2508', lid: '#9B5523', lidMid: '#6C3E1A', lidDark: '#4E2A10', top: '#A05828', topMid: '#7C4218', topDark: '#5E3010' },
     mahogany: { front: '#6B1010', mid: '#4A0808', dark: '#2E0000', side: '#5A0A0A', sideMid: '#3E0505', sideDark: '#2A0000', left: '#7A1515', leftMid: '#550A0A', leftDark: '#3A0505', lid: '#7A1818', lidMid: '#551010', lidDark: '#3A0808', top: '#8A2020', topMid: '#651515', topDark: '#4A0A0A' },
@@ -847,19 +708,11 @@
     document.querySelectorAll('.box-bottom').forEach(el => el.style.background = `linear-gradient(145deg, ${theme.dark} 0%, ${theme.dark} 100%)`);
   }
 
-  applyColorTheme(boxColor);
-
-  let useUploadedAudio = !!songId;
-  let audioBuffer = null;     // decoded AudioBuffer for uploaded file
-  let audioSource = null;     // currently playing BufferSource
-  let playbackPosition = 0;   // seconds into the audio we've played so far
-
-  const STATE_KEY = songId ? `musicbox_state_${songId}` : 'musicbox_state_default';
-
-  let savedState = loadState();
-  if (savedState) {
-    playbackPosition = savedState.playbackPosition || 0;
-  }
+  // ── State ──
+  let audioBuffer = null;
+  let audioSource = null;
+  let playbackPosition = 0;
+  let boxParticles = 'notes';
 
   let isWinding = false;
   let windStartTime = 0;
@@ -873,12 +726,7 @@
   let playTimer = null;
   let audioCtx = null;
 
-  // For default melody mode
-  let noteIndex = savedState ? (savedState.noteIndex || 0) : 0;
-  let scheduledNotes = [];
-
-  // For image slideshow
-  let currentImgIndex = savedState ? (savedState.currentImgIndex || 0) : 0;
+  let currentImgIndex = 0;
 
   // ── Elements ──
   const windArea = document.getElementById('windArea');
@@ -888,54 +736,7 @@
   const energyBar = document.getElementById('energyBar');
   const statusText = document.getElementById('statusText');
   const timeInfo = document.getElementById('timeInfo');
-
   const musicBox = document.getElementById('musicBox');
-
-  // ── Default Melody ──
-  const melody = [
-    { freq: 1047, dur: 200 }, { freq: 1319, dur: 200 }, { freq: 1568, dur: 300 },
-    { freq: 1319, dur: 200 }, { freq: 1047, dur: 200 }, { freq: 1175, dur: 300 },
-    { freq: 1047, dur: 200 }, { freq: 880, dur: 200 },  { freq: 784, dur: 400 },
-    { freq: 0, dur: 200 },
-    { freq: 784, dur: 200 },  { freq: 880, dur: 200 },  { freq: 1047, dur: 300 },
-    { freq: 1175, dur: 200 }, { freq: 1319, dur: 200 }, { freq: 1568, dur: 300 },
-    { freq: 1319, dur: 200 }, { freq: 1175, dur: 200 }, { freq: 1047, dur: 400 },
-    { freq: 0, dur: 200 },
-    { freq: 1568, dur: 200 }, { freq: 1397, dur: 200 }, { freq: 1319, dur: 300 },
-    { freq: 1175, dur: 200 }, { freq: 1047, dur: 200 }, { freq: 880, dur: 300 },
-    { freq: 784, dur: 200 },  { freq: 880, dur: 200 },  { freq: 1047, dur: 400 },
-    { freq: 0, dur: 300 },
-    { freq: 1319, dur: 200 }, { freq: 1175, dur: 200 }, { freq: 1047, dur: 200 },
-    { freq: 880, dur: 200 },  { freq: 784, dur: 300 },  { freq: 880, dur: 200 },
-    { freq: 1047, dur: 300 }, { freq: 1319, dur: 200 }, { freq: 1568, dur: 400 },
-    { freq: 0, dur: 400 },
-  ];
-
-  // ── Load uploaded song from IndexedDB ──
-  function loadSongFromDB(id, storeName) {
-    storeName = storeName || 'songs';
-    return new Promise((resolve, reject) => {
-      const req = indexedDB.open('musicbox_db', 2);
-      req.onupgradeneeded = (e) => {
-        const db = e.target.result;
-        if (!db.objectStoreNames.contains('songs')) {
-          db.createObjectStore('songs', { keyPath: 'id', autoIncrement: true });
-        }
-        if (!db.objectStoreNames.contains('shared_songs')) {
-          db.createObjectStore('shared_songs', { keyPath: 'id', autoIncrement: true });
-        }
-      };
-      req.onsuccess = (e) => {
-        const db = e.target.result;
-        const tx = db.transaction(storeName, 'readonly');
-        const store = tx.objectStore(storeName);
-        const getReq = store.get(id);
-        getReq.onsuccess = () => resolve(getReq.result);
-        getReq.onerror = () => reject(getReq.error);
-      };
-      req.onerror = () => reject(req.error);
-    });
-  }
 
   // ── Audio ──
   function ensureAudio() {
@@ -943,44 +744,6 @@
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
     if (audioCtx.state === 'suspended') audioCtx.resume();
-  }
-
-  function playMelodyNote(freq, duration, time) {
-    if (!audioCtx || freq === 0) return;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    const filter = audioCtx.createBiquadFilter();
-
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(freq, time);
-
-    filter.type = 'highpass';
-    filter.frequency.setValueAtTime(400, time);
-    filter.Q.setValueAtTime(1, time);
-
-    const attackTime = 0.005;
-    const decayTime = Math.min(duration / 1000 * 2, 1.5);
-    gain.gain.setValueAtTime(0, time);
-    gain.gain.linearRampToValueAtTime(0.3, time + attackTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, time + attackTime + decayTime);
-
-    osc.connect(filter);
-    filter.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start(time);
-    osc.stop(time + attackTime + decayTime + 0.05);
-
-    const osc2 = audioCtx.createOscillator();
-    const gain2 = audioCtx.createGain();
-    osc2.type = 'sine';
-    osc2.frequency.setValueAtTime(freq * 2, time);
-    gain2.gain.setValueAtTime(0, time);
-    gain2.gain.linearRampToValueAtTime(0.08, time + attackTime);
-    gain2.gain.exponentialRampToValueAtTime(0.001, time + attackTime + decayTime * 0.6);
-    osc2.connect(gain2);
-    gain2.connect(audioCtx.destination);
-    osc2.start(time);
-    osc2.stop(time + attackTime + decayTime + 0.05);
   }
 
   function playClickSound() {
@@ -1020,7 +783,7 @@
 
   function onWindStart(e) {
     e.preventDefault();
-    if (isPlaying) return;
+    if (isPlaying || !audioBuffer) return;
 
     ensureAudio();
     isWinding = true;
@@ -1088,16 +851,10 @@
     record.classList.add('spinning');
     statusText.textContent = 'playing...';
 
-    if (useUploadedAudio && audioBuffer) {
-      startAudioPlayback();
-    } else {
-      scheduleMelodyNotes();
-    }
-
+    startAudioPlayback();
     updatePlayback();
   }
 
-  // ── Uploaded audio playback ──
   function startAudioPlayback() {
     if (audioSource) {
       try { audioSource.stop(); } catch(e) {}
@@ -1107,34 +864,11 @@
     audioSource.buffer = audioBuffer;
     audioSource.connect(audioCtx.destination);
 
-    // Start from saved position, looping
     const startOffset = playbackPosition % audioBuffer.duration;
     audioSource.loop = true;
     audioSource.loopStart = 0;
     audioSource.loopEnd = audioBuffer.duration;
     audioSource.start(0, startOffset);
-
-    // Schedule stop at playDuration
-    audioSource.stopTime = audioCtx.currentTime + playDuration / 1000;
-  }
-
-  // ── Default melody scheduling ──
-  function scheduleMelodyNotes() {
-    const now = audioCtx.currentTime;
-    let timeOffset = 0;
-    let idx = noteIndex;
-    scheduledNotes = [];
-
-    while (timeOffset < playDuration) {
-      const note = melody[idx % melody.length];
-      const noteTime = now + timeOffset / 1000;
-      playMelodyNote(note.freq, note.dur, noteTime);
-
-      scheduledNotes.push({ time: timeOffset, idx });
-      timeOffset += note.dur;
-      idx++;
-    }
-    scheduledNotes._finalIdx = idx;
   }
 
   function updatePlayback() {
@@ -1146,45 +880,30 @@
 
     energyBar.style.width = (progress * 100) + '%';
 
-    // Animate lid: open over first 2s, close over last 2s
     const openMs = 2000;
     const closeMs = 2000;
     const maxAngle = 75;
     let lidAngle;
     if (elapsed < openMs) {
-      // Ease out during opening
       const t = elapsed / openMs;
       lidAngle = maxAngle * (1 - Math.pow(1 - t, 3));
     } else if (remaining < closeMs) {
-      // Ease in during closing
       const t = Math.max(0, remaining) / closeMs;
       lidAngle = maxAngle * (1 - Math.pow(1 - t, 3));
     } else {
       lidAngle = maxAngle;
     }
     lid.style.transform = `rotateX(${lidAngle}deg)`;
-    // Show interior proportionally
     const interiorEl = document.querySelector('.box-interior');
     interiorEl.style.opacity = Math.min(1, lidAngle / 30);
 
     const remSec = Math.max(0, remaining / 1000).toFixed(1);
     timeInfo.textContent = `${remSec}s remaining`;
 
-    // Animate teeth at intervals
-    // Spawn floating notes periodically
-    if (useUploadedAudio) {
-      const interval = 300;
-      const cur = Math.floor(elapsed / interval);
-      const prev = Math.floor((elapsed - 16) / interval);
-      if (cur !== prev) spawnNote();
-    } else {
-      for (const sn of scheduledNotes) {
-        if (!sn.triggered && elapsed >= sn.time) {
-          sn.triggered = true;
-          spawnNote();
-        }
-      }
-    }
+    const interval = 300;
+    const cur = Math.floor(elapsed / interval);
+    const prev = Math.floor((elapsed - 16) / interval);
+    if (cur !== prev) spawnNote();
 
     if (elapsed >= playDuration) {
       stopPlaying();
@@ -1199,43 +918,21 @@
     cancelAnimationFrame(playTimer);
     record.classList.remove('spinning');
 
-    // Stop uploaded audio
     if (audioSource) {
       try { audioSource.stop(); } catch(e) {}
       audioSource = null;
     }
 
     const elapsed = Date.now() - playStartTime;
+    playbackPosition += (elapsed / 1000);
+    playbackPosition = playbackPosition % audioBuffer.duration;
 
-    if (useUploadedAudio && audioBuffer) {
-      // Save how far into the audio file we got
-      playbackPosition += (elapsed / 1000);
-      // Wrap around if past the end
-      playbackPosition = playbackPosition % audioBuffer.duration;
-
-      saveState({ playbackPosition, currentImgIndex });
-
-      statusText.textContent = 'power depleted — power up again to continue';
-      timeInfo.textContent = '';
-    } else {
-      // Default melody — save note index
-      let timeAcc = 0;
-      let idx = noteIndex;
-      while (timeAcc < elapsed && timeAcc < playDuration) {
-        timeAcc += melody[idx % melody.length].dur;
-        idx++;
-      }
-      noteIndex = idx;
-      saveState({ noteIndex, currentImgIndex });
-
-      statusText.textContent = 'power depleted — power up again to continue';
-      timeInfo.textContent = '';
-    }
+    statusText.textContent = 'power depleted \u2014 power up again to continue';
+    timeInfo.textContent = '';
 
     lid.style.transform = 'rotateX(0deg)';
     document.querySelector('.box-interior').style.opacity = '0';
     energyBar.style.width = '0%';
-    savedState = loadState();
   }
 
   const particleSets = {
@@ -1256,19 +953,7 @@
     setTimeout(() => el.remove(), 2000);
   }
 
-  // ── Persistence ──
-  function saveState(state) {
-    try { localStorage.setItem(STATE_KEY, JSON.stringify(state)); } catch(e) {}
-  }
-
-  function loadState() {
-    try {
-      const s = localStorage.getItem(STATE_KEY);
-      return s ? JSON.parse(s) : null;
-    } catch(e) { return null; }
-  }
-
-  // ── Setup song visuals (name, images) ──
+  // ── Setup song visuals ──
   function setupSongVisuals(name, images) {
     const textPath = document.getElementById('recordTextPath');
     if (textPath && name) {
@@ -1278,9 +963,9 @@
     if (images && images.length > 0) {
       const container = document.getElementById('lidPhotos');
       currentImgIndex = currentImgIndex % images.length;
-      images.forEach((dataUrl, i) => {
+      images.forEach((url, i) => {
         const img = document.createElement('img');
-        img.src = dataUrl;
+        img.src = url;
         if (i === currentImgIndex) img.classList.add('active');
         container.appendChild(img);
       });
@@ -1298,152 +983,157 @@
     }
   }
 
-  // ── Helper: base64 data URL to Blob ──
-  function dataUrlToBlob(dataUrl) {
-    const [header, b64] = dataUrl.split(',');
-    const mime = header.match(/:(.*?);/)[1];
-    const bytes = atob(b64);
-    const arr = new Uint8Array(bytes.length);
-    for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
-    return new Blob([arr], { type: mime });
-  }
+  // ── Load shared box from Supabase ──
+  const loadingDetail = document.getElementById('loadingDetail');
 
-  // ── Share button handler ──
-  async function handleShare() {
-    const shareBtn = document.getElementById('shareBtn');
-    if (!currentSong) return;
-    shareBtn.disabled = true;
-    shareBtn.textContent = 'uploading...';
+  async function loadSharedBox(id) {
+    loadingDetail.textContent = 'fetching config...';
+    const url = `${SUPABASE_URL}/rest/v1/shared_boxes?id=eq.${id}&select=*`;
+    const res = await fetch(url, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    if (!res.ok) throw new Error('failed to fetch shared box');
+    const rows = await res.json();
+    if (!rows.length) throw new Error('shared box not found');
+    const box = rows[0];
 
-    try {
-      const shareUuid = crypto.randomUUID();
-      const audioPath = `${shareUuid}.wav`;
+    loadingDetail.textContent = 'downloading audio...';
+    const audioRes = await fetch(`${SUPABASE_URL}/storage/v1/object/public/audio/${box.audio_path}`);
+    if (!audioRes.ok) throw new Error('Failed to fetch audio');
+    const audioData = await audioRes.arrayBuffer();
 
-      // Upload audio to storage
-      const audioBlob = new Blob([currentSong.data], { type: 'audio/wav' });
-      const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/audio/${audioPath}`, {
-        method: 'POST',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'audio/wav',
-        },
-        body: audioBlob,
-      });
-      if (!uploadRes.ok) {
-        const err = await uploadRes.text();
-        throw new Error('Audio upload failed: ' + err);
-      }
-
-      // Upload images to storage
-      const imagePaths = [];
-      if (currentSong.images && currentSong.images.length > 0) {
-        for (let i = 0; i < currentSong.images.length; i++) {
-          const imgBlob = dataUrlToBlob(currentSong.images[i]);
-          const ext = imgBlob.type.split('/')[1] || 'png';
-          const imgPath = `${shareUuid}_img_${i}.${ext}`;
-          const imgUploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/audio/${imgPath}`, {
-            method: 'POST',
-            headers: {
-              'apikey': SUPABASE_KEY,
-              'Authorization': `Bearer ${SUPABASE_KEY}`,
-              'Content-Type': imgBlob.type,
-            },
-            body: imgBlob,
-          });
-          if (!imgUploadRes.ok) {
-            const err = await imgUploadRes.text();
-            throw new Error(`Image ${i + 1} upload failed: ` + err);
+    // Convert image storage paths to public URLs and download as data URLs for IndexedDB
+    const imageDataUrls = [];
+    if (box.images && box.images.length > 0) {
+      loadingDetail.textContent = 'downloading images...';
+      for (const path of box.images) {
+        const imgUrl = `${SUPABASE_URL}/storage/v1/object/public/audio/${path}`;
+        try {
+          const imgRes = await fetch(imgUrl);
+          if (imgRes.ok) {
+            const blob = await imgRes.blob();
+            const dataUrl = await new Promise(resolve => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result);
+              reader.readAsDataURL(blob);
+            });
+            imageDataUrls.push(dataUrl);
           }
-          imagePaths.push(imgPath);
-        }
+        } catch (e) { /* skip failed images */ }
       }
-
-      // Insert metadata (store storage paths, not base64)
-      const metadata = {
-        id: shareUuid,
-        name: currentSong.name || 'music Box',
-        color: boxColor,
-        particles: boxParticles,
-        images: imagePaths,
-        duration: currentSong.duration || null,
-        audio_path: audioPath,
-      };
-
-      const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/shared_boxes`, {
-        method: 'POST',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal',
-        },
-        body: JSON.stringify(metadata),
-      });
-      if (!insertRes.ok) {
-        const err = await insertRes.text();
-        throw new Error('metadata insert failed: ' + err);
-      }
-
-      // Build share URL
-      const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '');
-      const shareUrl = `${baseUrl}/share.html?id=${shareUuid}`;
-      showShareModal(shareUrl);
-    } catch (e) {
-      console.error('Share failed:', e);
-      alert('Share failed: ' + e.message);
-    } finally {
-      shareBtn.disabled = false;
-      shareBtn.textContent = 'share \u2192';
+      box.images = box.images.map(path =>
+        `${SUPABASE_URL}/storage/v1/object/public/audio/${path}`
+      );
     }
+
+    return { ...box, audioData, imageDataUrls };
   }
 
-  function showShareModal(url) {
-    const overlay = document.getElementById('shareOverlay');
-    const input = document.getElementById('shareUrlInput');
-    input.value = url;
-    overlay.classList.add('visible');
+  // ── IndexedDB ──
+  function openSharedDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open('musicbox_db', 2);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains('songs')) {
+          db.createObjectStore('songs', { keyPath: 'id', autoIncrement: true });
+        }
+        if (!db.objectStoreNames.contains('shared_songs')) {
+          db.createObjectStore('shared_songs', { keyPath: 'id', autoIncrement: true });
+        }
+      };
+      req.onsuccess = (e) => resolve(e.target.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
 
-    document.getElementById('copyShareUrl').onclick = () => {
-      navigator.clipboard.writeText(url).then(() => {
-        document.getElementById('copyShareUrl').textContent = 'Copied!';
-        setTimeout(() => { document.getElementById('copyShareUrl').textContent = 'Copy'; }, 2000);
-      });
-    };
+  function findCachedBox(db, shareUuid) {
+    return new Promise((resolve) => {
+      const tx = db.transaction('shared_songs', 'readonly');
+      const store = tx.objectStore('shared_songs');
+      const req = store.getAll();
+      req.onsuccess = () => {
+        const match = req.result.find(r => r.shareId === shareUuid);
+        resolve(match || null);
+      };
+      req.onerror = () => resolve(null);
+    });
+  }
 
-    document.getElementById('shareClose').onclick = () => overlay.classList.remove('visible');
-    overlay.onclick = (e) => { if (e.target === overlay) overlay.classList.remove('visible'); };
+  function saveSongToDB(db, song) {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('shared_songs', 'readwrite');
+      const store = tx.objectStore('shared_songs');
+      const addReq = store.add(song);
+      addReq.onsuccess = () => resolve(addReq.result);
+      addReq.onerror = () => reject(addReq.error);
+    });
   }
 
   // ── Init ──
   async function init() {
-    if (songId) {
-      try {
-        const song = await loadSongFromDB(songId, songSource);
-        if (song) {
-          currentSong = song; // store for sharing
+    const overlay = document.getElementById('loadingOverlay');
+    try {
+      const db = await openSharedDB();
 
-          ensureAudio();
-          audioBuffer = await audioCtx.decodeAudioData(song.data.slice(0));
+      // Check IndexedDB cache first
+      loadingDetail.textContent = 'Checking local cache...';
+      const cached = await findCachedBox(db, shareId);
 
-          setupSongVisuals(song.name, song.images);
+      let audioData, color, particles, name, images;
 
-          // Show share button for local songs
-          document.getElementById('shareBtn').style.display = '';
-          document.getElementById('shareBtn').onclick = handleShare;
+      if (cached && cached.data) {
+        loadingDetail.textContent = 'Loading from cache...';
+        audioData = cached.data;
+        color = cached.color;
+        particles = cached.particles;
+        name = cached.name;
+        images = cached.images || [];
+      } else {
+        // Fetch from Supabase
+        const box = await loadSharedBox(shareId);
+        audioData = box.audioData;
+        color = box.color;
+        particles = box.particles;
+        name = box.name;
+        images = box.images || [];
 
-          if (savedState && savedState.playbackPosition != null) {
-            statusText.textContent = 'power up to resume';
-          }
-        } else {
-          useUploadedAudio = false;
+        // Save to IndexedDB for next time
+        loadingDetail.textContent = 'Saving to cache...';
+        try {
+          await saveSongToDB(db, {
+            shareId: shareId,
+            name: name || 'Music Box',
+            data: audioData,
+            duration: box.duration || null,
+            color: color || 'classic',
+            particles: particles || 'notes',
+            images: box.imageDataUrls || [],
+            addedAt: Date.now(),
+          });
+        } catch (dbErr) {
+          console.warn('Could not save to IndexedDB:', dbErr);
         }
-      } catch(e) {
-        console.error('Failed to load song:', e);
-        useUploadedAudio = false;
       }
-    } else {
-      useUploadedAudio = false;
+
+      loadingDetail.textContent = 'Preparing audio...';
+      ensureAudio();
+      audioBuffer = await audioCtx.decodeAudioData(audioData.slice(0));
+
+      if (color) applyColorTheme(color);
+      if (particles) boxParticles = particles;
+
+      setupSongVisuals(name, images);
+
+      overlay.style.opacity = '0';
+      overlay.style.transition = 'opacity 0.4s ease';
+      setTimeout(() => overlay.remove(), 400);
+
+      statusText.textContent = 'Power up to play';
+    } catch (e) {
+      console.error('Failed to load shared box:', e);
+      overlay.remove();
+      statusText.textContent = 'Shared music box not found';
     }
   }
 
