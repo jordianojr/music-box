@@ -1329,22 +1329,28 @@
 
     try {
       const shareUuid = crypto.randomUUID();
-      const audioPath = `${shareUuid}.wav`;
+      let audioPath;
 
-      // Upload audio to storage
-      const audioBlob = new Blob([currentSong.data], { type: 'audio/wav' });
-      const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/audio/${audioPath}`, {
-        method: 'POST',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'audio/wav',
-        },
-        body: audioBlob,
-      });
-      if (!uploadRes.ok) {
-        const err = await uploadRes.text();
-        throw new Error('Audio upload failed: ' + err);
+      if (currentSong.isDefault) {
+        // Re-use the default audio already in storage
+        audioPath = 'default.mp3';
+      } else {
+        // Upload audio to storage
+        audioPath = `${shareUuid}.wav`;
+        const audioBlob = new Blob([currentSong.data], { type: 'audio/wav' });
+        const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/audio/${audioPath}`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'audio/wav',
+          },
+          body: audioBlob,
+        });
+        if (!uploadRes.ok) {
+          const err = await uploadRes.text();
+          throw new Error('Audio upload failed: ' + err);
+        }
       }
 
       // Upload images to storage
@@ -1434,7 +1440,15 @@
         const song = await loadSongFromDB(songId, songSource);
         if (song) {
           currentSong = song; // store for sharing
-          pendingAudioData = song.data.slice(0);
+
+          if (song.isDefault) {
+            // Fetch default audio from Supabase storage
+            const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/audio/default.mp3`);
+            if (!res.ok) throw new Error('Failed to fetch default audio');
+            pendingAudioData = await res.arrayBuffer();
+          } else {
+            pendingAudioData = song.data.slice(0);
+          }
 
           setupSongVisuals(song.name, song.images);
 
