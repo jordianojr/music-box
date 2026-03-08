@@ -1442,8 +1442,14 @@
           currentSong = song; // store for sharing
 
           if (song.isDefault) {
-            // Fetch default audio from Supabase storage
-            const res = await fetch(`${SUPABASE_URL}/storage/v1/object/public/audio/default.mp3`);
+            // Fetch default audio — check cache first, then network
+            const defaultUrl = `${SUPABASE_URL}/storage/v1/object/public/audio/default.mp3`;
+            const cache = await caches.open('musicbox-defaults');
+            let res = await cache.match(defaultUrl);
+            if (!res) {
+              res = await fetch(defaultUrl);
+              if (res.ok) cache.put(defaultUrl, res.clone());
+            }
             if (!res.ok) throw new Error('Failed to fetch default audio');
             pendingAudioData = await res.arrayBuffer();
           } else {
