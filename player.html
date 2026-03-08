@@ -872,6 +872,7 @@
   let playDuration = 0;
   let playTimer = null;
   let audioCtx = null;
+  let pendingAudioData = null; // raw ArrayBuffer waiting to be decoded on user gesture
 
   // For default melody mode
   let noteIndex = savedState ? (savedState.noteIndex || 0) : 0;
@@ -1018,11 +1019,22 @@
     windTimer = requestAnimationFrame(updateWindDisplay);
   }
 
-  function onWindStart(e) {
+  async function onWindStart(e) {
     e.preventDefault();
     if (isPlaying) return;
 
     ensureAudio();
+
+    // Decode audio on first user gesture (mobile requires this)
+    if (pendingAudioData && !audioBuffer) {
+      try {
+        audioBuffer = await audioCtx.decodeAudioData(pendingAudioData);
+        pendingAudioData = null;
+      } catch (err) {
+        console.error('Failed to decode audio:', err);
+      }
+    }
+
     isWinding = true;
     windStartTime = Date.now();
     lastAngle = getAngle(e);
@@ -1422,9 +1434,7 @@
         const song = await loadSongFromDB(songId, songSource);
         if (song) {
           currentSong = song; // store for sharing
-
-          ensureAudio();
-          audioBuffer = await audioCtx.decodeAudioData(song.data.slice(0));
+          pendingAudioData = song.data.slice(0);
 
           setupSongVisuals(song.name, song.images);
 

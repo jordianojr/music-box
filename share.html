@@ -709,6 +709,7 @@
   }
 
   // ── State ──
+  let pendingAudioData = null;
   let audioBuffer = null;
   let audioSource = null;
   let playbackPosition = 0;
@@ -781,11 +782,23 @@
     windTimer = requestAnimationFrame(updateWindDisplay);
   }
 
-  function onWindStart(e) {
+  async function onWindStart(e) {
     e.preventDefault();
-    if (isPlaying || !audioBuffer) return;
+    if (isPlaying || (!audioBuffer && !pendingAudioData)) return;
 
     ensureAudio();
+
+    // Decode audio on first user gesture (mobile requires this)
+    if (pendingAudioData && !audioBuffer) {
+      try {
+        audioBuffer = await audioCtx.decodeAudioData(pendingAudioData.slice(0));
+        pendingAudioData = null;
+      } catch (err) {
+        console.error('Failed to decode audio:', err);
+        return;
+      }
+    }
+
     isWinding = true;
     windStartTime = Date.now();
     lastAngle = getAngle(e);
@@ -1116,9 +1129,7 @@
         }
       }
 
-      loadingDetail.textContent = 'Preparing audio...';
-      ensureAudio();
-      audioBuffer = await audioCtx.decodeAudioData(audioData.slice(0));
+      pendingAudioData = audioData;
 
       if (color) applyColorTheme(color);
       if (particles) boxParticles = particles;
