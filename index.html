@@ -687,15 +687,14 @@
     </div>
 
     <label class="creator-label">Sound <small class="creator-hint">MP3, WAV, OGG, M4A, etc.</small></label>
-    <div style="display:flex; gap:8px;">
-      <div class="creator-file-btn" id="audioUploadBtn" style="flex:1;">
-        <span id="audioFileName">Choose audio file</span>
-      </div>
-      <div class="creator-file-btn" id="defaultAudioBtn" style="flex:0 0 auto; padding:0 14px; font-size:12px; opacity:0.7;">
-        Default
-      </div>
+    <div class="creator-file-btn" id="audioUploadBtn">
+      <span id="audioFileName">Choose audio file</span>
     </div>
     <input type="file" id="fileInput" accept="audio/*" style="display:none">
+    <label style="display:flex; align-items:center; gap:8px; margin-top:8px; font-size:12px; opacity:0.7; cursor:pointer;">
+      <input type="checkbox" id="defaultAudioCheck" style="accent-color:#d4af37; width:16px; height:16px; cursor:pointer;">
+      Use default audio
+    </label>
 
     <label class="creator-label">Photos <small class="creator-hint">optional, displayed inside lid</small></label>
     <div class="creator-file-btn" id="imageUploadBtn">
@@ -957,6 +956,7 @@
     boxNameInput.value = '';
     audioFileName.textContent = 'Choose audio file';
     audioUploadBtn.classList.remove('has-file');
+    defaultAudioCheck.checked = false;
     imageFileCount.textContent = 'Choose images';
     imageUploadBtn.classList.remove('has-file');
     imagePreviewRow.innerHTML = '';
@@ -993,15 +993,23 @@
     if (pOpt) pOpt.classList.add('selected');
 
     // Pre-fill audio (keep existing)
-    pendingAudio = {
-      arrayBuffer: box.data,
-      fileName: box.fileName,
-      size: box.size,
-      type: box.type,
-      duration: box.duration,
-    };
-    audioFileName.textContent = box.fileName || 'Current audio';
-    audioUploadBtn.classList.add('has-file');
+    if (box.isDefault) {
+      defaultAudioCheck.checked = true;
+      pendingAudio = { arrayBuffer: null, fileName: 'default', size: 0, type: 'audio/mp3', duration: null, isDefault: true };
+      audioFileName.textContent = 'Choose audio file';
+      audioUploadBtn.classList.remove('has-file');
+    } else {
+      defaultAudioCheck.checked = false;
+      pendingAudio = {
+        arrayBuffer: box.data,
+        fileName: box.fileName,
+        size: box.size,
+        type: box.type,
+        duration: box.duration,
+      };
+      audioFileName.textContent = box.fileName || 'Current audio';
+      audioUploadBtn.classList.add('has-file');
+    }
 
     // Pre-fill images
     pendingImages = [];
@@ -1029,20 +1037,33 @@
   // Audio upload
   audioUploadBtn.addEventListener('click', () => fileInput.click());
 
-  // Default audio
-  const defaultAudioBtn = document.getElementById('defaultAudioBtn');
-  defaultAudioBtn.addEventListener('click', () => {
-    pendingAudio = {
-      arrayBuffer: null,
-      fileName: 'default',
-      size: 0,
-      type: 'audio/wav',
-      duration: null,
-      isDefault: true,
-    };
-    audioFileName.textContent = 'Default audio';
-    audioUploadBtn.classList.add('has-file');
-    createConfirm.disabled = false;
+  // Default audio checkbox
+  const defaultAudioCheck = document.getElementById('defaultAudioCheck');
+
+  function updateCreateBtn() {
+    const hasUpload = pendingAudio && !pendingAudio.isDefault;
+    const hasDefault = defaultAudioCheck.checked;
+    createConfirm.disabled = !(hasUpload || hasDefault);
+  }
+
+  defaultAudioCheck.addEventListener('change', () => {
+    if (defaultAudioCheck.checked) {
+      // Clear uploaded audio
+      pendingAudio = {
+        arrayBuffer: null,
+        fileName: 'default',
+        size: 0,
+        type: 'audio/mp3',
+        duration: null,
+        isDefault: true,
+      };
+      audioFileName.textContent = 'Choose audio file';
+      audioUploadBtn.classList.remove('has-file');
+      fileInput.value = '';
+    } else {
+      pendingAudio = null;
+    }
+    updateCreateBtn();
   });
 
   fileInput.addEventListener('change', async () => {
@@ -1082,12 +1103,13 @@
           type: file.type,
           duration,
         };
+        defaultAudioCheck.checked = false;
         audioFileName.textContent = file.name;
         audioUploadBtn.classList.add('has-file');
         if (!boxNameInput.value.trim()) {
           boxNameInput.value = file.name.replace(/\.[^/.]+$/, '');
         }
-        createConfirm.disabled = false;
+        updateCreateBtn();
       }
     };
     reader.readAsArrayBuffer(file);
@@ -1147,8 +1169,15 @@
 
   // Create/Save confirm
   createConfirm.addEventListener('click', async () => {
-    if (!pendingAudio) {
-      showToast('Please upload audio first');
+    const hasUpload = pendingAudio && !pendingAudio.isDefault;
+    const hasDefault = defaultAudioCheck.checked;
+
+    if (!hasUpload && !hasDefault) {
+      showToast('Please upload audio or select default');
+      return;
+    }
+    if (hasUpload && hasDefault) {
+      showToast('Choose either uploaded audio or default, not both');
       return;
     }
 
@@ -1459,12 +1488,13 @@
       type: 'audio/wav',
       duration: trimDuration,
     };
+    defaultAudioCheck.checked = false;
     audioFileName.textContent = `${file.name} (trimmed ${formatTime(startSec)}-${formatTime(endSec)})`;
     audioUploadBtn.classList.add('has-file');
     if (!boxNameInput.value.trim()) {
       boxNameInput.value = file.name.replace(/\.[^/.]+$/, '');
     }
-    createConfirm.disabled = false;
+    updateCreateBtn();
 
     closeTrimmer();
     showToast('Audio trimmed!');
