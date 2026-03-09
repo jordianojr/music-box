@@ -591,10 +591,10 @@
     overlay.classList.add('visible');
 
     document.getElementById('copyShareUrl').onclick = () => {
-      const text = `${url}\nPassword: ${password}`;
+      const text = `${url}\npassword: ${password}`;
       navigator.clipboard.writeText(text).then(() => {
-        document.getElementById('copyShareUrl').textContent = 'Copied!';
-        setTimeout(() => { document.getElementById('copyShareUrl').textContent = 'Copy'; }, 2000);
+        document.getElementById('copyShareUrl').textContent = 'copied!';
+        setTimeout(() => { document.getElementById('copyShareUrl').textContent = 'copy link & password'; }, 2000);
       });
     };
 

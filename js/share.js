@@ -19,7 +19,7 @@
   const shareId = params.get('id');
 
   if (!shareId) {
-    document.getElementById('statusText').textContent = 'No music box ID provided';
+    document.getElementById('statusText').textContent = 'no music box id provided';
     return;
   }
 
@@ -347,7 +347,7 @@
   const loadingDetail = document.getElementById('loadingDetail');
 
   async function loadSharedBox(id, password) {
-    loadingDetail.textContent = 'verifying password...';
+    loadingDetail.textContent = password ? 'verifying password...' : 'fetching config...';
     const res = await fetch(EDGE_FN_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -437,13 +437,13 @@
       const db = await openSharedDB();
 
       // Check IndexedDB cache first (skip password check for cached boxes)
-      loadingDetail.textContent = 'Checking local cache...';
+      loadingDetail.textContent = 'checking local cache...';
       const cached = await findCachedBox(db, shareId);
 
       let audioData, color, particles, name, images;
 
       if (cached && cached.data) {
-        loadingDetail.textContent = 'Loading from cache...';
+        loadingDetail.textContent = 'loading from cache...';
         audioData = cached.data;
         color = cached.color;
         particles = cached.particles;
@@ -456,10 +456,10 @@
         color = box.color;
         particles = box.particles;
         name = box.name;
-        images = box.images || [];
+        images = box.imageDataUrls || [];
 
         // Save to IndexedDB for next time
-        loadingDetail.textContent = 'Saving to cache...';
+        loadingDetail.textContent = 'saving to cache...';
         try {
           await saveSongToDB(db, {
             shareId: shareId,
@@ -487,7 +487,7 @@
       overlay.style.transition = 'opacity 0.4s ease';
       setTimeout(() => overlay.remove(), 400);
 
-      statusText.textContent = 'Power up to play';
+      statusText.textContent = 'power up to play';
     } catch (e) {
       console.error('Failed to load shared box:', e);
       overlay.style.display = 'none';
@@ -532,18 +532,18 @@
 
     async function submitPassword() {
       const pw = pwInput.value.trim();
-      if (!pw) { pwError.textContent = 'Please enter the password'; return; }
+      if (!pw) { pwError.textContent = 'please enter the password'; return; }
       pwSubmit.disabled = true;
-      pwSubmit.textContent = 'Verifying...';
+      pwSubmit.textContent = 'verifying...';
       pwError.textContent = '';
       try {
         pwOverlay.remove();
         await loadBox(pw);
       } catch (e) {
         document.body.prepend(pwOverlay);
-        pwError.textContent = e.message || 'Failed to load';
+        pwError.textContent = e.message || 'failed to load';
         pwSubmit.disabled = false;
-        pwSubmit.textContent = 'Open';
+        pwSubmit.textContent = 'open';
       }
     }
 

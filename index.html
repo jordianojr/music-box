@@ -23,12 +23,12 @@
 <!-- Create Music Box Modal -->
 <div class="creator-overlay" id="creatorOverlay">
   <div class="creator-modal">
-    <div class="creator-title" id="creatorTitle">Create Music Box</div>
+    <div class="creator-title" id="creatorTitle">create music box</div>
 
-    <label class="creator-label">Name <span class="vinyl-hint">(displayed on vinyl)</span></label>
-    <input class="creator-input" type="text" id="boxNameInput" placeholder="My Music Box">
+    <label class="creator-label">name <span class="vinyl-hint">(displayed on vinyl)</span></label>
+    <input class="creator-input" type="text" id="boxNameInput" placeholder="my music box">
 
-    <label class="creator-label">Colour</label>
+    <label class="creator-label">colour</label>
     <div class="color-options" id="colorOptions">
       <div class="color-swatch selected" data-color="classic" style="background: linear-gradient(135deg, #8B4513, #A0522D);" title="Classic Brown"></div>
       <div class="color-swatch" data-color="mahogany" style="background: linear-gradient(135deg, #4A0000, #800020);" title="Mahogany"></div>
@@ -38,24 +38,24 @@
       <div class="color-swatch" data-color="rosewood" style="background: linear-gradient(135deg, #65000B, #8B2252);" title="Rosewood"></div>
     </div>
 
-    <label class="creator-label">Sound <small class="creator-hint">MP3, WAV, OGG, M4A, etc.</small></label>
+    <label class="creator-label">sound <small class="creator-hint">mp3, wav, ogg, m4a, etc.</small></label>
     <div class="creator-file-btn" id="audioUploadBtn">
-      <span id="audioFileName">Choose audio file</span>
+      <span id="audioFileName">choose audio file</span>
     </div>
     <input type="file" id="fileInput" accept="audio/*,.mp3,.wav,.m4a,.ogg,.aac,.flac,.opus,.webm,.3gp,.amr,.mp4" style="display:none">
     <label style="display:flex; align-items:center; gap:8px; margin-top:8px; font-size:12px; opacity:0.7; cursor:pointer;">
       <input type="checkbox" id="defaultAudioCheck" style="accent-color:#d4af37; width:16px; height:16px; cursor:pointer;">
-      Use default audio
+      use default audio
     </label>
 
-    <label class="creator-label">Photos <small class="creator-hint">optional, displayed inside lid</small></label>
+    <label class="creator-label">photos <small class="creator-hint">optional, displayed inside lid</small></label>
     <div class="creator-file-btn" id="imageUploadBtn">
-      <span id="imageFileCount">Choose images</span>
+      <span id="imageFileCount">choose images</span>
     </div>
     <input type="file" id="imageInput" accept="image/*" multiple style="display:none">
     <div class="image-preview-row" id="imagePreviewRow"></div>
 
-    <label class="creator-label">Particles</label>
+    <label class="creator-label">particles</label>
     <div class="particle-options" id="particleOptions">
       <div class="particle-option selected" data-particles="notes" title="Music Notes">&#9835;</div>
       <div class="particle-option" data-particles="hearts" title="Hearts">&#10084;</div>
@@ -63,8 +63,8 @@
     </div>
 
     <div class="trimmer-actions" style="margin-top:20px">
-      <button class="trim-cancel" id="createCancel">Cancel</button>
-      <button class="trim-confirm" id="createConfirm" disabled>Create</button>
+      <button class="trim-cancel" id="createCancel">cancel</button>
+      <button class="trim-confirm" id="createConfirm" disabled>create</button>
     </div>
   </div>
 </div>
@@ -73,8 +73,8 @@
 <!-- Trimmer Modal -->
 <div class="trimmer-overlay" id="trimmerOverlay">
   <div class="trimmer-modal">
-    <div class="trimmer-title">Trim Audio</div>
-    <div class="trimmer-subtitle" id="trimmerSubtitle">Drag handles to select a section</div>
+    <div class="trimmer-title">trim audio</div>
+    <div class="trimmer-subtitle" id="trimmerSubtitle">drag handles to select a section</div>
 
     <div class="waveform-container" id="waveformContainer">
       <canvas class="waveform-canvas" id="waveformCanvas"></canvas>
@@ -90,13 +90,13 @@
       <span id="trimEndTime">0:00</span>
     </div>
 
-    <div class="trim-selection-info" id="trimSelectionInfo">Selected: 0:00 — 0:00 (0s)</div>
+    <div class="trim-selection-info" id="trimSelectionInfo">selected: 0:00 — 0:00 (0s)</div>
 
-    <button class="trim-preview-btn" id="trimPreviewBtn">Preview selection</button>
+    <button class="trim-preview-btn" id="trimPreviewBtn">preview selection</button>
 
     <div class="trimmer-actions">
-      <button class="trim-cancel" id="trimCancel">Cancel</button>
-      <button class="trim-confirm" id="trimConfirm">Use selection</button>
+      <button class="trim-cancel" id="trimCancel">cancel</button>
+      <button class="trim-confirm" id="trimConfirm">use selection</button>
     </div>
   </div>
 </div>
@@ -106,12 +106,12 @@
 <script src="js/index.js"></script>
 
 <div style="margin-top: 40px; padding: 16px 20px; text-align: center; max-width: 300px; font-size: 12px; letter-spacing: 0.5px; color: rgba(255,100,100,0.6); border: 1px solid rgba(255,100,100,0.15); border-radius: 8px; line-height: 1.5;">
-  All shared images and audio are publicly accessible. Never upload sensitive or private data.
+  all shared images and audio are publicly accessible. never upload sensitive or private data.
 </div>
 
 <div style="margin-top: 20px; padding: 20px; text-align: center; opacity: 0.6; font-size: 13px; letter-spacing: 0.5px; max-width: 300px;">
-  <p style="margin-bottom: 12px;">If you're happy with the product, scan to donate!</p>
-  <img src="assets/qr.jpg" alt="Donation QR Code" style="width: 160px; height: 160px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2);">
+  <p style="margin-bottom: 12px;">if you're happy with the product, scan to donate!</p>
+  <img src="assets/qr.jpg" alt="donation qr code" style="width: 160px; height: 160px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2);">
 </div>
 
 </body>

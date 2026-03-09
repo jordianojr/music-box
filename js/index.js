@@ -202,15 +202,15 @@
     pendingAudio = null;
     pendingImages = [];
     boxNameInput.value = '';
-    audioFileName.textContent = 'Choose audio file';
+    audioFileName.textContent = 'choose audio file';
     audioUploadBtn.classList.remove('has-file');
     defaultAudioCheck.checked = false;
-    imageFileCount.textContent = 'Choose images';
+    imageFileCount.textContent = 'choose images';
     imageUploadBtn.classList.remove('has-file');
     imagePreviewRow.innerHTML = '';
     createConfirm.disabled = true;
-    createConfirm.textContent = 'Create';
-    creatorTitle.textContent = 'Create Music Box';
+    createConfirm.textContent = 'create';
+    creatorTitle.textContent = 'create music box';
     selectedColor = 'classic';
     colorOptions.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
     colorOptions.querySelector('[data-color="classic"]').classList.add('selected');
@@ -222,8 +222,8 @@
 
   function openEditor(box) {
     editingBoxId = box.id;
-    creatorTitle.textContent = 'Edit Music Box';
-    createConfirm.textContent = 'Save';
+    creatorTitle.textContent = 'edit music box';
+    createConfirm.textContent = 'save';
 
     boxNameInput.value = box.name || '';
 
@@ -240,7 +240,7 @@
     if (box.isDefault) {
       defaultAudioCheck.checked = true;
       pendingAudio = { arrayBuffer: null, fileName: 'default', size: 0, type: 'audio/mp3', duration: null, isDefault: true };
-      audioFileName.textContent = 'Choose audio file';
+      audioFileName.textContent = 'choose audio file';
       audioUploadBtn.classList.remove('has-file');
     } else {
       defaultAudioCheck.checked = false;
@@ -299,7 +299,7 @@
         duration: null,
         isDefault: true,
       };
-      audioFileName.textContent = 'Choose audio file';
+      audioFileName.textContent = 'choose audio file';
       audioUploadBtn.classList.remove('has-file');
       fileInput.value = '';
     } else {
@@ -386,7 +386,7 @@
       imageFileCount.textContent = `${pendingImages.length} image${pendingImages.length > 1 ? 's' : ''} selected`;
       imageUploadBtn.classList.add('has-file');
     } else {
-      imageFileCount.textContent = 'Choose images';
+      imageFileCount.textContent = 'choose images';
       imageUploadBtn.classList.remove('has-file');
     }
   }
@@ -625,7 +625,7 @@
       previewTimer = null;
     }
     playhead.classList.remove('active');
-    trimPreviewBtn.textContent = 'Preview selection';
+    trimPreviewBtn.textContent = 'preview selection';
   }
 
   let isPreviewing = false;
@@ -641,7 +641,7 @@
     stopPreview();
 
     isPreviewing = true;
-    trimPreviewBtn.textContent = 'Stop preview';
+    trimPreviewBtn.textContent = 'stop preview';
 
     const ctx = trimState.audioCtx;
     if (ctx.state === 'suspended') ctx.resume();
