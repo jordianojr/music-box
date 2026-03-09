@@ -1073,7 +1073,7 @@
     if (!file) return;
     fileInput.value = '';
 
-    const audioExts = /\.(mp3|wav|ogg|m4a|aac|flac|wma|opus|webm)$/i;
+    const audioExts = /\.(mp3|wav|ogg|m4a|aac|flac|wma|opus|webm|3gp|3gpp|amr|caf)$/i;
     if (!file.type.startsWith('audio/') && !audioExts.test(file.name)) {
       showToast('Please upload an audio file');
       return;
