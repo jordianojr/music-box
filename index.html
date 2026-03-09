@@ -1087,7 +1087,9 @@
       const tempCtx = new (window.AudioContext || window.webkitAudioContext)();
       let decoded;
       try {
-        decoded = await tempCtx.decodeAudioData(arrayBuffer.slice(0));
+        decoded = await new Promise((resolve, reject) => {
+          tempCtx.decodeAudioData(arrayBuffer.slice(0), resolve, reject);
+        });
       } catch (err) {
         showToast('Could not decode audio file');
         tempCtx.close();

@@ -788,10 +788,13 @@
 
     ensureAudio();
 
-    // Decode audio on first user gesture (mobile requires this)
+    // Decode audio on first user gesture (mobile/Safari requires this)
     if (pendingAudioData && !audioBuffer) {
       try {
-        audioBuffer = await audioCtx.decodeAudioData(pendingAudioData.slice(0));
+        const copy = pendingAudioData.slice(0);
+        audioBuffer = await new Promise((resolve, reject) => {
+          audioCtx.decodeAudioData(copy, resolve, reject);
+        });
         pendingAudioData = null;
       } catch (err) {
         console.error('Failed to decode audio:', err);
