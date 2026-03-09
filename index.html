@@ -690,7 +690,7 @@
     <div class="creator-file-btn" id="audioUploadBtn">
       <span id="audioFileName">Choose audio file</span>
     </div>
-    <input type="file" id="fileInput" accept="audio/*" style="display:none">
+    <input type="file" id="fileInput" accept="audio/*,.mp3,.wav,.m4a,.ogg,.aac,.flac,.opus,.webm,.3gp,.amr,.mp4" style="display:none">
     <label style="display:flex; align-items:center; gap:8px; margin-top:8px; font-size:12px; opacity:0.7; cursor:pointer;">
       <input type="checkbox" id="defaultAudioCheck" style="accent-color:#d4af37; width:16px; height:16px; cursor:pointer;">
       Use default audio
@@ -1073,8 +1073,9 @@
     if (!file) return;
     fileInput.value = '';
 
-    const audioExts = /\.(mp3|wav|ogg|m4a|aac|flac|wma|opus|webm|3gp|3gpp|amr|caf)$/i;
-    if (!file.type.startsWith('audio/') && !audioExts.test(file.name)) {
+    const audioExts = /\.(mp3|wav|ogg|m4a|aac|flac|wma|opus|webm|3gp|3gpp|amr|caf|mp4)$/i;
+    const audioMime = file.type.startsWith('audio/') || file.type.startsWith('video/');
+    if (!audioMime && !audioExts.test(file.name)) {
       showToast('Please upload an audio file');
       return;
     }
