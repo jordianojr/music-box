@@ -567,12 +567,12 @@
         throw new Error(err.error || 'Share failed');
       }
 
-      const { id: shareUuid } = await res.json();
+      const { id: shareUuid, password } = await res.json();
 
       // Build share URL
       const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '');
       const shareUrl = `${baseUrl}/share.html?id=${shareUuid}`;
-      showShareModal(shareUrl);
+      showShareModal(shareUrl, password);
     } catch (e) {
       console.error('Share failed:', e);
       alert('Share failed: ' + e.message);
@@ -582,14 +582,17 @@
     }
   }
 
-  function showShareModal(url) {
+  function showShareModal(url, password) {
     const overlay = document.getElementById('shareOverlay');
     const input = document.getElementById('shareUrlInput');
+    const pwDisplay = document.getElementById('sharePassword');
     input.value = url;
+    pwDisplay.textContent = password;
     overlay.classList.add('visible');
 
     document.getElementById('copyShareUrl').onclick = () => {
-      navigator.clipboard.writeText(url).then(() => {
+      const text = `${url}\nPassword: ${password}`;
+      navigator.clipboard.writeText(text).then(() => {
         document.getElementById('copyShareUrl').textContent = 'Copied!';
         setTimeout(() => { document.getElementById('copyShareUrl').textContent = 'Copy'; }, 2000);
       });
@@ -609,7 +612,7 @@
 
           if (song.isDefault) {
             // Fetch default audio — check cache first, then network
-            const defaultUrl = `${SUPABASE_URL}/storage/v1/object/public/audio/default.mp3`;
+            const defaultUrl = `${SUPABASE_URL}/storage/v1/object/public/default/default.mp3`;
             const cache = await caches.open('musicbox-defaults');
             let res = await cache.match(defaultUrl);
             if (!res) {

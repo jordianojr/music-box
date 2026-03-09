@@ -2,7 +2,7 @@
   const DB_NAME = 'musicbox_db';
   const STORE_NAME = 'songs';
   const SUPABASE_URL = 'https://idtoiuwzitbgggmkvryy.supabase.co';
-  const DEFAULT_AUDIO_URL = `${SUPABASE_URL}/storage/v1/object/public/audio/default.mp3`;
+  const DEFAULT_AUDIO_URL = `${SUPABASE_URL}/storage/v1/object/public/default/default.mp3`;
   let db = null;
 
   // ── IndexedDB ──

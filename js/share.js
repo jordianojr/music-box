@@ -25,7 +25,7 @@
 
   // ── Supabase ──
   const SUPABASE_URL = 'https://idtoiuwzitbgggmkvryy.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkdG9pdXd6aXRiZ2dnbWt2cnl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NzM4MTgsImV4cCI6MjA4ODU0OTgxOH0.4ziW9Pllmlk7mUft-6A0HHOCMzIOQdIt7Hi-RBmC3ME';
+  const EDGE_FN_URL = `${SUPABASE_URL}/functions/v1/get-box`;
 
   // ── Color themes ──
   const colorThemes = {
@@ -343,33 +343,34 @@
     }
   }
 
-  // ── Load shared box from Supabase ──
+  // ── Load shared box from Edge Function ──
   const loadingDetail = document.getElementById('loadingDetail');
 
-  async function loadSharedBox(id) {
-    loadingDetail.textContent = 'fetching config...';
-    const url = `${SUPABASE_URL}/rest/v1/shared_boxes?id=eq.${id}&select=*`;
-    const res = await fetch(url, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+  async function loadSharedBox(id, password) {
+    loadingDetail.textContent = 'verifying password...';
+    const res = await fetch(EDGE_FN_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, password }),
     });
-    if (!res.ok) throw new Error('failed to fetch shared box');
-    const rows = await res.json();
-    if (!rows.length) throw new Error('shared box not found');
-    const box = rows[0];
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(err.error || 'failed to fetch shared box');
+    }
+    const box = await res.json();
 
     loadingDetail.textContent = 'downloading audio...';
-    const audioRes = await fetch(`${SUPABASE_URL}/storage/v1/object/public/audio/${box.audio_path}`);
+    const audioRes = await fetch(box.audio_url);
     if (!audioRes.ok) throw new Error('Failed to fetch audio');
     const audioData = await audioRes.arrayBuffer();
 
-    // Convert image storage paths to public URLs and download as data URLs for IndexedDB
+    // Download images via signed URLs
     const imageDataUrls = [];
-    if (box.images && box.images.length > 0) {
+    if (box.image_urls && box.image_urls.length > 0) {
       loadingDetail.textContent = 'downloading images...';
-      for (const path of box.images) {
-        const imgUrl = `${SUPABASE_URL}/storage/v1/object/public/audio/${path}`;
+      for (const signedUrl of box.image_urls) {
         try {
-          const imgRes = await fetch(imgUrl);
+          const imgRes = await fetch(signedUrl);
           if (imgRes.ok) {
             const blob = await imgRes.blob();
             const dataUrl = await new Promise(resolve => {
@@ -381,9 +382,6 @@
           }
         } catch (e) { /* skip failed images */ }
       }
-      box.images = box.images.map(path =>
-        `${SUPABASE_URL}/storage/v1/object/public/audio/${path}`
-      );
     }
 
     return { ...box, audioData, imageDataUrls };
@@ -430,13 +428,15 @@
     });
   }
 
-  // ── Init ──
-  async function init() {
+  // ── Load box after password verification ──
+  async function loadBox(password) {
     const overlay = document.getElementById('loadingOverlay');
+    overlay.style.display = 'flex';
+
     try {
       const db = await openSharedDB();
 
-      // Check IndexedDB cache first
+      // Check IndexedDB cache first (skip password check for cached boxes)
       loadingDetail.textContent = 'Checking local cache...';
       const cached = await findCachedBox(db, shareId);
 
@@ -450,8 +450,8 @@
         name = cached.name;
         images = cached.images || [];
       } else {
-        // Fetch from Supabase
-        const box = await loadSharedBox(shareId);
+        // Fetch from Edge Function with password
+        const box = await loadSharedBox(shareId, password);
         audioData = box.audioData;
         color = box.color;
         particles = box.particles;
@@ -490,9 +490,65 @@
       statusText.textContent = 'Power up to play';
     } catch (e) {
       console.error('Failed to load shared box:', e);
-      overlay.remove();
-      statusText.textContent = 'Shared music box not found';
+      overlay.style.display = 'none';
+      throw e;
     }
+  }
+
+  // ── Init: try without password first, prompt only if needed ──
+  async function init() {
+    const pwOverlay = document.getElementById('passwordOverlay');
+    const pwInput = document.getElementById('passwordInput');
+    const pwSubmit = document.getElementById('passwordSubmit');
+    const pwError = document.getElementById('passwordError');
+
+    // Check cache first
+    try {
+      const db = await openSharedDB();
+      const cached = await findCachedBox(db, shareId);
+      if (cached && cached.data) {
+        pwOverlay.remove();
+        await loadBox(null);
+        return;
+      }
+    } catch (e) { /* continue to network */ }
+
+    // Try loading without password (legacy boxes)
+    try {
+      pwOverlay.style.display = 'none';
+      await loadBox(null);
+      pwOverlay.remove();
+      return;
+    } catch (e) {
+      if (e.message === 'Password required') {
+        pwOverlay.style.display = 'flex';
+      } else {
+        pwOverlay.remove();
+        document.getElementById('loadingOverlay').style.display = 'none';
+        statusText.textContent = e.message || 'Failed to load';
+        return;
+      }
+    }
+
+    async function submitPassword() {
+      const pw = pwInput.value.trim();
+      if (!pw) { pwError.textContent = 'Please enter the password'; return; }
+      pwSubmit.disabled = true;
+      pwSubmit.textContent = 'Verifying...';
+      pwError.textContent = '';
+      try {
+        pwOverlay.remove();
+        await loadBox(pw);
+      } catch (e) {
+        document.body.prepend(pwOverlay);
+        pwError.textContent = e.message || 'Failed to load';
+        pwSubmit.disabled = false;
+        pwSubmit.textContent = 'Open';
+      }
+    }
+
+    pwSubmit.addEventListener('click', submitPassword);
+    pwInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitPassword(); });
   }
 
   init();

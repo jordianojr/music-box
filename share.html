@@ -8,11 +8,40 @@
 </head>
 <body>
 
+<!-- Password prompt -->
+<div id="passwordOverlay" style="
+  position: fixed; inset: 0; z-index: 10000;
+  background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a15 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-family: 'Georgia', serif; color: #d4af37;
+">
+  <div style="text-align: center; max-width: 300px; width: 100%; padding: 0 20px;">
+    <div style="font-size: 32px; margin-bottom: 16px;">&#9835;</div>
+    <div style="font-size: 18px; letter-spacing: 1px; margin-bottom: 6px;">Music Box</div>
+    <div style="font-size: 12px; opacity: 0.4; margin-bottom: 24px;">Enter the password to open</div>
+    <input type="text" id="passwordInput" maxlength="6" autocomplete="off" spellcheck="false"
+      placeholder="------"
+      style="
+        width: 100%; text-align: center; font-family: monospace; font-size: 24px;
+        letter-spacing: 6px; padding: 12px; border-radius: 10px;
+        background: rgba(255,255,255,0.06); border: 1px solid rgba(212,175,55,0.3);
+        color: #d4af37; outline: none;
+      ">
+    <div id="passwordError" style="font-size: 12px; color: rgba(255,100,100,0.8); margin-top: 10px; min-height: 18px;"></div>
+    <button id="passwordSubmit" style="
+      margin-top: 10px; width: 100%; padding: 12px; border-radius: 10px;
+      background: linear-gradient(135deg, rgba(212,175,55,0.3), rgba(139,69,19,0.3));
+      border: 1px solid rgba(212,175,55,0.4); color: #d4af37;
+      font-family: 'Georgia', serif; font-size: 14px; cursor: pointer; letter-spacing: 1px;
+    ">Open</button>
+  </div>
+</div>
+
 <!-- Loading overlay -->
 <div id="loadingOverlay" style="
   position: fixed; inset: 0; z-index: 9999;
   background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a15 100%);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  display: none; flex-direction: column; align-items: center; justify-content: center;
   font-family: 'Georgia', serif; color: #d4af37;
 ">
   <div style="width: 60px; height: 60px; border: 3px solid rgba(212,175,55,0.2); border-top-color: #d4af37; border-radius: 50%; animation: loader-spin 1s linear infinite; margin-bottom: 24px;"></div>

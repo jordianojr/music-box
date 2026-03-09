@@ -14,11 +14,15 @@
 <div class="share-modal-overlay" id="shareOverlay">
   <div class="share-modal">
     <h3>Share your music box</h3>
-    <p>Anyone with this link can play your music box</p>
+    <p>Send the link and password to your recipient</p>
     <div class="share-url-box">
       <input type="text" id="shareUrlInput" readonly>
-      <button id="copyShareUrl">Copy</button>
     </div>
+    <div class="share-password-box">
+      <span class="share-pw-label">Password</span>
+      <span class="share-pw-value" id="sharePassword"></span>
+    </div>
+    <button id="copyShareUrl">Copy link & password</button>
     <button class="share-close" id="shareClose">close</button>
   </div>
 </div>
