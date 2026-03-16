@@ -45,6 +45,9 @@
   .pw-box button:hover{background:#e8e0d4}
   .pw-box .pw-err{font-family:'Cormorant Garamond',serif;font-size:14px;color:#c05050;min-height:20px}
   .pw-box .pw-loading{font-family:'Cormorant Garamond',serif;font-size:14px;color:#8a8478;font-style:italic}
+  .music-btn{position:fixed;bottom:20px;right:20px;z-index:900;width:44px;height:44px;border-radius:50%;border:1.8px solid #d4cabb;background:#faf6ef;color:#5a5549;font-size:20px;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,0.08);transition:background 0.2s}
+  .music-btn:hover{background:#f0ebe2}
+  .music-btn.visible{display:flex}
 </style>
 </head>
 <body>
@@ -441,6 +444,8 @@
   </div>
 </div>
 
+<button class="music-btn" id="music-btn" title="Play/Pause music">&#9654;</button>
+
 <div class="pw-overlay" id="pw-overlay">
   <div class="pw-box">
     <h2>Enter Password</h2>
@@ -579,17 +584,33 @@ async function loadFromEdge(password) {
 
 // ——— Audio player ———
 let bgAudio = null;
+const musicBtn = document.getElementById('music-btn');
+
 function playSong(base64Data) {
   if (!base64Data || bgAudio) return;
   bgAudio = new Audio(base64Data);
   bgAudio.loop = true;
   bgAudio.volume = 0.7;
-  bgAudio.play().catch(() => {
-    // Autoplay blocked — play on first user interaction
-    const resume = () => { bgAudio.play(); document.removeEventListener('click', resume); };
-    document.addEventListener('click', resume);
-  });
+  musicBtn.classList.add('visible');
+  // Don't autoplay — let user click the button
+  updateMusicBtn();
 }
+
+function toggleMusic() {
+  if (!bgAudio) return;
+  if (bgAudio.paused) {
+    bgAudio.play();
+  } else {
+    bgAudio.pause();
+  }
+  updateMusicBtn();
+}
+
+function updateMusicBtn() {
+  musicBtn.innerHTML = bgAudio && !bgAudio.paused ? '&#9646;&#9646;' : '&#9654;';
+}
+
+musicBtn.addEventListener('click', toggleMusic);
 
 // ——— Init: check IndexedDB first, else prompt password ———
 async function init() {
