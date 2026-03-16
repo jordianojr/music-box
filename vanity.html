@@ -455,6 +455,7 @@ const SUPABASE_URL = 'https://idtoiuwzitbgggmkvryy.supabase.co';
 const EDGE_FN = `${SUPABASE_URL}/functions/v1/get-vanity`;
 const DB_NAME = 'vanityDB';
 const STORE_NAME = 'items';
+const META_STORE = 'meta';
 
 const tip = document.getElementById('tip');
 const modal = document.getElementById('modal');
@@ -469,11 +470,14 @@ const pwErr = document.getElementById('pw-err');
 // ——— IndexedDB helpers ———
 function openDB() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 1);
+    const req = indexedDB.open(DB_NAME, 2);
     req.onupgradeneeded = () => {
       const db = req.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, { keyPath: 'name' });
+      }
+      if (!db.objectStoreNames.contains(META_STORE)) {
+        db.createObjectStore(META_STORE, { keyPath: 'key' });
       }
     };
     req.onsuccess = () => resolve(req.result);
@@ -503,8 +507,29 @@ async function saveItems(items) {
   });
 }
 
-// ——— Fetch image as blob and convert to base64 for caching ———
-async function fetchImageAsBase64(url) {
+async function getSong() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(META_STORE, 'readonly');
+    const store = tx.objectStore(META_STORE);
+    const req = store.get('song');
+    req.onsuccess = () => resolve(req.result ? req.result.data : null);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function saveSong(base64) {
+  const db = await openDB();
+  const tx = db.transaction(META_STORE, 'readwrite');
+  tx.objectStore(META_STORE).put({ key: 'song', data: base64 });
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+// ——— Fetch as base64 for caching ———
+async function fetchAsBase64(url) {
   try {
     const res = await fetch(url);
     const blob = await res.blob();
@@ -534,18 +559,36 @@ async function authenticate(password) {
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Failed');
-  return data.items;
+  return data;
 }
 
 async function loadFromEdge(password) {
-  const items = await authenticate(password);
-  // Download all images as base64 in parallel
-  const withImages = await Promise.all(items.map(async (item) => {
-    const imageData = item.image_url ? await fetchImageAsBase64(item.image_url) : null;
-    return { name: item.name, description: item.description, imageData };
-  }));
+  const data = await authenticate(password);
+  // Download all images + song in parallel
+  const [withImages, songData] = await Promise.all([
+    Promise.all(data.items.map(async (item) => {
+      const imageData = item.image_url ? await fetchAsBase64(item.image_url) : null;
+      return { name: item.name, description: item.description, imageData };
+    })),
+    data.song_url ? fetchAsBase64(data.song_url) : null,
+  ]);
   await saveItems(withImages);
-  return withImages;
+  if (songData) await saveSong(songData);
+  return { items: withImages, songData };
+}
+
+// ——— Audio player ———
+let bgAudio = null;
+function playSong(base64Data) {
+  if (!base64Data || bgAudio) return;
+  bgAudio = new Audio(base64Data);
+  bgAudio.loop = true;
+  bgAudio.volume = 0.7;
+  bgAudio.play().catch(() => {
+    // Autoplay blocked — play on first user interaction
+    const resume = () => { bgAudio.play(); document.removeEventListener('click', resume); };
+    document.addEventListener('click', resume);
+  });
 }
 
 // ——— Init: check IndexedDB first, else prompt password ———
@@ -554,6 +597,8 @@ async function init() {
     const cached = await getAllItems();
     if (cached.length > 0) {
       populateData(cached);
+      const songData = await getSong();
+      playSong(songData);
       return;
     }
   } catch {}
@@ -571,9 +616,10 @@ async function handleUnlock() {
   pwBtn.disabled = true;
   pwBtn.textContent = 'Loading…';
   try {
-    const items = await loadFromEdge(pw);
+    const { items, songData } = await loadFromEdge(pw);
     populateData(items);
     pwOverlay.classList.remove('open');
+    playSong(songData);
   } catch (e) {
     pwErr.textContent = e.message === 'Incorrect password' ? 'Wrong password, try again' : 'Something went wrong';
   } finally {
